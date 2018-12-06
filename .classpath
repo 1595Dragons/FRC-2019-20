@@ -11,5 +11,8 @@
 	<classpathentry kind="var" path="USERLIBS_DIR/CTRE_Phoenix.jar"/>
 	<classpathentry kind="var" path="USERLIBS_DIR/CTRE_Phoenix_WPIAPI-sources.jar"/>
 	<classpathentry kind="var" path="USERLIBS_DIR/CTRE_Phoenix_WPIAPI.jar"/>
+	<classpathentry kind="lib" path="3rd-party-libs/CTRE/lib/CTRE_Phoenix_WPIAPI.jar" sourcepath="3rd-party-libs/CTRE/lib/CTRE_Phoenix_WPIAPI-sources.jar"/>
+	<classpathentry kind="lib" path="3rd-party-libs/CTRE/lib/CTRE_Phoenix.jar" sourcepath="3rd-party-libs/CTRE/lib/CTRE_Phoenix-sources.jar"/>
+	<classpathentry kind="var" path="USERLIBS_DIR/navx_frc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
