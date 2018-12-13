@@ -52,6 +52,8 @@ public class RobotMap {
 		leftDrive2.set(ControlMode.Follower, leftDrive1Port);
 		rightDrive2.set(ControlMode.Follower, rightDrive1Port);
 		rightIntake.set(ControlMode.Follower, leftIntakePort);
+		leftDrive1.setInverted(true);
+		
 		
 	
 	}
