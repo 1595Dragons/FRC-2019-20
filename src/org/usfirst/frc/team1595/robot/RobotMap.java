@@ -10,6 +10,7 @@ package org.usfirst.frc.team1595.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
@@ -53,8 +54,6 @@ public class RobotMap {
 		rightDrive2.set(ControlMode.Follower, rightDrive1Port);
 		rightIntake.set(ControlMode.Follower, leftIntakePort);
 		leftDrive1.setInverted(true);
-		
-		
 	
 	}
 	

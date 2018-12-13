@@ -41,6 +41,12 @@ public class Robot extends TimedRobot {
 		// SmartDashboard.putData("Auto mode", m_chooser);
 		robot = new RobotMap();
 	}
+	
+	
+	@Override 
+	public void robotPeriodic() {
+		
+	}
 
 	/**
 	 * This function is called once each time the robot enters Disabled mode. You
@@ -112,8 +118,9 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
 
-		// Calculate drive code
-		double forward = robot.gamepad1.getY(Hand.kLeft)/2, turn = robot.gamepad1.getX(Hand.kRight)/2;
+		// Calculate drive code, with turbo button
+		double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft) : robot.gamepad1.getY(Hand.kLeft)/2, 
+				turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight) : robot.gamepad1.getX(Hand.kRight)/2;
 
 		if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
 
