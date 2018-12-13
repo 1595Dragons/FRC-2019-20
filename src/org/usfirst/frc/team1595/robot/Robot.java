@@ -115,8 +115,15 @@ public class Robot extends TimedRobot {
 		// Calculate drive code
 		double forward = robot.gamepad1.getY(Hand.kLeft), turn = robot.gamepad1.getX(Hand.kRight);
 		
+		if (Math.abs(forward) > 0.1d || Math.abs(turn) > 0.1d) {
+		
 		robot.leftDrive1.set(ControlMode.PercentOutput, forward+turn);
 		robot.rightDrive1.set(ControlMode.PercentOutput, forward-turn);
+		
+		} else {
+			robot.leftDrive1.set(ControlMode.PercentOutput, 0);
+			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
+		}
 		
 	}
 
