@@ -12,6 +12,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -25,9 +27,8 @@ public class Robot extends TimedRobot {
 	// public static OI m_oi;
 
 	private RobotMap robot;
-
-	// Command m_autonomousCommand;
-	// SendableChooser<Command> m_chooser = new SendableChooser<>();
+	
+	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
 	/**
 	 * This function is run when the robot is first started up and should be used
@@ -35,19 +36,21 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-		// m_oi = new OI();
-		// m_chooser.addDefault("Default Auto", new ExampleCommand());
-		// chooser.addObject("My Auto", new MyAutoCommand());
-		// SmartDashboard.putData("Auto mode", m_chooser);
-		robot = new RobotMap();
+		
+		// Get the kind of robot
+		robotType.addDefault("2018 Chicago robot", RobotType.Chicago_2018);
+		robotType.addObject("2018 China robot", RobotType.China_2018);
+		SmartDashboard.putData(robotType);
 	}
 	
 	
 	@Override 
 	public void robotPeriodic() {
+		Scheduler.getInstance().run();
 		
 	}
 
+	
 	/**
 	 * This function is called once each time the robot enters Disabled mode. You
 	 * can use it to reset any subsystem information you want to clear when the
@@ -57,6 +60,7 @@ public class Robot extends TimedRobot {
 	public void disabledInit() {
 
 	}
+	
 
 	@Override
 	public void disabledPeriodic() {
@@ -109,6 +113,7 @@ public class Robot extends TimedRobot {
 		// if (m_autonomousCommand != null) {
 		// m_autonomousCommand.cancel();
 		// }
+		robot = new RobotMap();
 	}
 
 	/**
@@ -121,6 +126,7 @@ public class Robot extends TimedRobot {
 		// Calculate drive code, with turbo button
 		double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft) : robot.gamepad1.getY(Hand.kLeft)/2, 
 				turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight) : robot.gamepad1.getX(Hand.kRight)/2;
+				
 
 		if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
 
@@ -131,6 +137,9 @@ public class Robot extends TimedRobot {
 			robot.leftDrive1.set(ControlMode.PercentOutput, 0);
 			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
 		}
+		
+		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
+		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
 
 	}
 
@@ -139,5 +148,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void testPeriodic() {
+		
+		
 	}
 }
