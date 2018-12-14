@@ -38,8 +38,8 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		
 		// Get the kind of robot
-		robotType.addDefault("2018 Chicago robot", RobotType.Chicago_2018);
-		robotType.addObject("2018 China robot", RobotType.China_2018);
+		robotType.addDefault("2018 China robot", RobotType.China_2018);
+		robotType.addObject("2018 Chicago robot", RobotType.Chicago_2018);
 		SmartDashboard.putData(robotType);
 	}
 	
@@ -113,7 +113,7 @@ public class Robot extends TimedRobot {
 		// if (m_autonomousCommand != null) {
 		// m_autonomousCommand.cancel();
 		// }
-		robot = new RobotMap();
+		robot = new RobotMap(robotType.getSelected());
 	}
 
 	/**
