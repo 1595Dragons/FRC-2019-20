@@ -138,6 +138,10 @@ public class Robot extends TimedRobot {
 			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
 		}
 		
+		if (robotType.getSelected().equals(RobotType.China_2018)) {
+			robot.liftDrive1.set(ControlMode.PercentOutput, robot.gamepad2.getY(Hand.kLeft));
+		}
+		
 		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
 		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
 
