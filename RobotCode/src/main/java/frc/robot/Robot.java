@@ -7,92 +7,126 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.IterativeRobot;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the IterativeRobot
+ * functions corresponding to each mode, as described in the TimedRobot
  * documentation. If you change the name of this class or the package after
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends IterativeRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+public class Robot extends TimedRobot {
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
-  }
+	private RobotMap robot;
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-  }
+	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
-   */
-  @Override
-  public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // autoSelected = SmartDashboard.getString("Auto Selector",
-    // defaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
-  }
+	/**
+	 * This function is run when the robot is first started up and should be used
+	 * for any initialization code.
+	 */
+	@Override
+	public void robotInit() {
 
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
-  }
+		// Get the kind of robot
+		robotType.setDefaultOption("2018 Chicago robot", RobotType.Chicago_2018);
+		robotType.addOption("2018 China robot", RobotType.China_2018);
+		SmartDashboard.putData(robotType);
+	}
 
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
-  }
+	@Override
+	public void robotPeriodic() {
 
-  /**
-   * This function is called periodically during test mode.
-   */
-  @Override
-  public void testPeriodic() {
-  }
+	}
+
+	/**
+	 * This function is called once each time the robot enters Disabled mode. You
+	 * can use it to reset any subsystem information you want to clear when the
+	 * robot is disabled.
+	 */
+	@Override
+	public void disabledInit() {
+
+	}
+
+	@Override
+	public void disabledPeriodic() {
+
+	}
+
+	/**
+	 * This autonomous (along with the chooser code above) shows how to select
+	 * between different autonomous modes using the dashboard. The sendable chooser
+	 * code works with the Java SmartDashboard. If you prefer the LabVIEW Dashboard,
+	 * remove all of the chooser code and uncomment the getString code to get the
+	 * auto name from the text box below the Gyro
+	 *
+	 * <p>
+	 * You can add additional auto modes by adding additional commands to the
+	 * chooser code above (like the commented example) or additional comparisons to
+	 * the switch structure below with additional strings & commands.
+	 */
+	@Override
+	public void autonomousInit() {
+
+	}
+
+	/**
+	 * This function is called periodically during autonomous.
+	 */
+	@Override
+	public void autonomousPeriodic() {
+
+	}
+
+	@Override
+	public void teleopInit() {
+
+		robot = new RobotMap(robotType.getSelected());
+	}
+
+	/**
+	 * This function is called periodically during operator control.
+	 */
+	@Override
+	public void teleopPeriodic() {
+
+		// Calculate drive code, with turbo button
+		double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft)
+				: robot.gamepad1.getY(Hand.kLeft) / 2,
+				turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
+						: robot.gamepad1.getX(Hand.kRight) / 2;
+
+		if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
+
+			robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
+			robot.rightDrive1.set(ControlMode.PercentOutput, forward + turn);
+
+		} else {
+			robot.leftDrive1.set(ControlMode.PercentOutput, 0);
+			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
+		}
+
+		if (robotType.getSelected().equals(RobotType.China_2018)) {
+			robot.liftDrive1.set(ControlMode.PercentOutput, robot.gamepad2.getY(Hand.kLeft));
+		}
+
+		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
+		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
+
+	}
+
+	/**
+	 * This function is called periodically during test mode.
+	 */
+	@Override
+	public void testPeriodic() {
+
+	}
 }
