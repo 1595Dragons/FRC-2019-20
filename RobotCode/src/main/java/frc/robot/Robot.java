@@ -9,6 +9,8 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -25,6 +27,8 @@ public class Robot extends TimedRobot {
 
 	private RobotMap robot;
 
+	private Vision visionCode = new Vision();
+
 	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
 	/**
@@ -38,6 +42,12 @@ public class Robot extends TimedRobot {
 		robotType.setDefaultOption("2018 Chicago robot", RobotType.Chicago_2018);
 		robotType.addOption("2018 China robot", RobotType.China_2018);
 		SmartDashboard.putData(robotType);
+
+		// Setup the camera
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(480,240);
+		camera.setFPS(15);
+		
 	}
 
 	@Override
@@ -116,6 +126,8 @@ public class Robot extends TimedRobot {
 		if (robotType.getSelected().equals(RobotType.China_2018)) {
 			robot.liftDrive1.set(ControlMode.PercentOutput, robot.gamepad2.getY(Hand.kLeft));
 		}
+
+		visionCode.findTape();
 
 		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
 		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
