@@ -9,6 +9,7 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import edu.wpi.cscore.CameraServerJNI;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -25,7 +26,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-	private RobotMap robot;
+	private RobotMap robot = new RobotMap(RobotType.Chicago_2018);
+
+	private Vision vision = new Vision();
 
 	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
@@ -36,20 +39,15 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotInit() {
 
-		// Get the kind of robot
-		robotType.setDefaultOption("2018 Chicago robot", RobotType.Chicago_2018);
-		robotType.addOption("2018 China robot", RobotType.China_2018);
-		SmartDashboard.putData(robotType);
-
 		// Setup the camera for the driver
 		UsbCamera drivercam = CameraServer.getInstance().startAutomaticCapture(0);
-		drivercam.setResolution(360,180);
-		drivercam.setFPS(15);
+		drivercam.setResolution(480,240);
+		drivercam.setFPS(12);
 
 
 		// Setup the camera used for vision
 		UsbCamera visioncam = CameraServer.getInstance().startAutomaticCapture(1);
-		visioncam.setFPS(5);
+		visioncam.setFPS(4);
 		visioncam.setBrightness(0);
 		visioncam.setWhiteBalanceManual(10000);
 		visioncam.setResolution(480,240);
@@ -105,6 +103,7 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 
 		robot = new RobotMap(robotType.getSelected());
+
 	}
 
 	/**
@@ -145,4 +144,5 @@ public class Robot extends TimedRobot {
 	public void testPeriodic() {
 
 	}
+
 }

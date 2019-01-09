@@ -30,8 +30,8 @@ public class GRIPVision implements VisionPipeline {
 	private Mat hsvThresholdOutput = new Mat();
 	private Mat cvErodeOutput = new Mat();
 	private Mat maskOutput = new Mat();
-	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
-	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+	public ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
+	public ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
