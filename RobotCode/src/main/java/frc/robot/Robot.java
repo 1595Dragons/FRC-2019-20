@@ -27,8 +27,6 @@ public class Robot extends TimedRobot {
 
 	private RobotMap robot;
 
-	private Vision visionCode = new Vision();
-
 	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
 	/**
@@ -43,10 +41,18 @@ public class Robot extends TimedRobot {
 		robotType.addOption("2018 China robot", RobotType.China_2018);
 		SmartDashboard.putData(robotType);
 
-		// Setup the camera
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(480,240);
-		camera.setFPS(15);
+		// Setup the camera for the driver
+		UsbCamera drivercam = CameraServer.getInstance().startAutomaticCapture(0);
+		drivercam.setResolution(360,180);
+		drivercam.setFPS(15);
+
+
+		// Setup the camera used for vision
+		UsbCamera visioncam = CameraServer.getInstance().startAutomaticCapture(1);
+		visioncam.setFPS(5);
+		visioncam.setBrightness(0);
+		visioncam.setWhiteBalanceManual(10000);
+		visioncam.setResolution(480,240);
 		
 	}
 
@@ -113,11 +119,11 @@ public class Robot extends TimedRobot {
 				turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
 						: robot.gamepad1.getX(Hand.kRight) / 2;
 
+		
+		// Basic west coast drive code
 		if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
-
 			robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
 			robot.rightDrive1.set(ControlMode.PercentOutput, forward + turn);
-
 		} else {
 			robot.leftDrive1.set(ControlMode.PercentOutput, 0);
 			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
@@ -126,8 +132,6 @@ public class Robot extends TimedRobot {
 		if (robotType.getSelected().equals(RobotType.China_2018)) {
 			robot.liftDrive1.set(ControlMode.PercentOutput, robot.gamepad2.getY(Hand.kLeft));
 		}
-
-		visionCode.findTape();
 
 		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
 		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
