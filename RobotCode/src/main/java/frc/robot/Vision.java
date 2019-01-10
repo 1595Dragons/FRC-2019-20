@@ -24,9 +24,10 @@ public class Vision {
             Mat source = new Mat();
 
             while (!Thread.interrupted()) {
-                cvSink.grabFrame(source);
-                grip.process(source);
-                outputStream.putFrame(source);
+                if (cvSink.grabFrame(source) != 0) {
+                    grip.process(source);
+                    outputStream.putFrame(grip.maskOutput());
+                }
             }
         }).start();
     }
