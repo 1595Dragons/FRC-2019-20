@@ -28,6 +28,8 @@ public class Robot extends TimedRobot {
 
 	private Vision vision = new Vision();
 
+	private UsbCamera visioncam;
+
 	/**
 	 * This function is run when the robot is first started up and should be used
 	 * for any initialization code.
@@ -37,16 +39,15 @@ public class Robot extends TimedRobot {
 
 		// Setup the camera for the driver
 		UsbCamera drivercam = CameraServer.getInstance().startAutomaticCapture(0);
-		drivercam.setResolution(480,240);
-		drivercam.setFPS(12);
-
+		drivercam.setResolution(480, 240);
+		drivercam.setFPS(8);
 
 		// Setup the camera used for vision
-		UsbCamera visioncam = CameraServer.getInstance().startAutomaticCapture(1);
-		visioncam.setFPS(4);
+		visioncam = CameraServer.getInstance().startAutomaticCapture(1);
+		visioncam.setFPS(6);
 		visioncam.setBrightness(0);
 		visioncam.setWhiteBalanceManual(10000);
-		visioncam.setResolution(480,240);
+		visioncam.setResolution(480, 240);
 
 		// Setup the targeting vision system
 		try {
@@ -54,7 +55,7 @@ public class Robot extends TimedRobot {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	@Override
@@ -119,7 +120,6 @@ public class Robot extends TimedRobot {
 				turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
 						: robot.gamepad1.getX(Hand.kRight) / 2;
 
-		
 		// Basic west coast drive code
 		if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
 			robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
@@ -131,6 +131,13 @@ public class Robot extends TimedRobot {
 
 		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
 		SmartDashboard.putNumber("Right drive power", robot.rightDrive1.getMotorOutputPercent());
+
+		// Try to get the center of the line
+		try {
+			SmartDashboard.putNumber("Center X", vision.findCenterX(visioncam.getVideoMode().width));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 

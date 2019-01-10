@@ -1,6 +1,9 @@
 package frc.robot;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
@@ -30,6 +33,25 @@ public class Vision {
                 }
             }
         }).start();
+    }
+
+    public double findCenterX(int cameraWidth) {
+
+        double centerX = 0.0d;
+
+        // Check if there are contours to go off of
+        if (grip.filterContoursOutput.isEmpty()) {
+            return 0.0d;
+        }
+
+        // Get the number of contours, and find their center X value
+        for (MatOfPoint matpoint : grip.filterContoursOutput) {
+            Rect r = Imgproc.boundingRect(matpoint);
+            centerX = ((r.x + r.width) - (r.width / 2) - (cameraWidth / 2));
+        }
+
+        return centerX;
+
     }
 
 }
