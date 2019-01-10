@@ -9,12 +9,10 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
-import edu.wpi.cscore.CameraServerJNI;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -29,8 +27,6 @@ public class Robot extends TimedRobot {
 	private RobotMap robot = new RobotMap(RobotType.Chicago_2018);
 
 	private Vision vision = new Vision();
-
-	private SendableChooser<RobotType> robotType = new SendableChooser<RobotType>();
 
 	/**
 	 * This function is run when the robot is first started up and should be used
@@ -51,6 +47,13 @@ public class Robot extends TimedRobot {
 		visioncam.setBrightness(0);
 		visioncam.setWhiteBalanceManual(10000);
 		visioncam.setResolution(480,240);
+
+		// Setup the targeting vision system
+		try {
+			vision.generateTargetImage(visioncam);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -102,8 +105,6 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 
-		robot = new RobotMap(robotType.getSelected());
-
 	}
 
 	/**
@@ -126,10 +127,6 @@ public class Robot extends TimedRobot {
 		} else {
 			robot.leftDrive1.set(ControlMode.PercentOutput, 0);
 			robot.rightDrive1.set(ControlMode.PercentOutput, 0);
-		}
-
-		if (robotType.getSelected().equals(RobotType.China_2018)) {
-			robot.liftDrive1.set(ControlMode.PercentOutput, robot.gamepad2.getY(Hand.kLeft));
 		}
 
 		SmartDashboard.putNumber("Left drive power", robot.leftDrive1.getMotorOutputPercent());
