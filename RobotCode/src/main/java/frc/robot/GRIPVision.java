@@ -45,9 +45,9 @@ public class GRIPVision implements VisionPipeline {
 	public void process(Mat source0) {
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
-		double[] hsvThresholdHue = { 55.03597199488028, 65.32423012899457 };
-		double[] hsvThresholdSaturation = { 126.88849176005493, 255.0 };
-		double[] hsvThresholdValue = { 4.586332028718304, 255.0 };
+		double[] hsvThresholdHue = { 50.0d, 70.0d };
+		double[] hsvThresholdSaturation = { 0.0d, 255.0 };
+		double[] hsvThresholdValue = { 0.0d, 255.0 };
 		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 		// Step CV_erode0:
