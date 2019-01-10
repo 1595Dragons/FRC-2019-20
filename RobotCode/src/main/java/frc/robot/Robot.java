@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 		visioncam = CameraServer.getInstance().startAutomaticCapture(1);
 		visioncam.setFPS(6);
 		visioncam.setBrightness(0);
-		visioncam.setWhiteBalanceManual(10000);
+		visioncam.setWhiteBalanceManual(100000);
 		visioncam.setResolution(480, 240);
 
 		// Setup the targeting vision system
