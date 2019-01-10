@@ -134,9 +134,17 @@ public class Robot extends TimedRobot {
 
 		// Try to get the center of the line
 		try {
-			SmartDashboard.putNumber("Center X", vision.findCenterX(visioncam.getVideoMode().width));
+			SmartDashboard.putNumber("Center X", vision.findCenterX());
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+
+		if (robot.gamepad1.getAButtonPressed()) {
+			SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
+		}
+
+		if (SmartDashboard.getBoolean("Vision tracking", false)) {
+			vision.trackTarget(SmartDashboard.getNumber("Center X", 0), robot.leftDrive1, robot.rightDrive1, .25d);
 		}
 
 	}

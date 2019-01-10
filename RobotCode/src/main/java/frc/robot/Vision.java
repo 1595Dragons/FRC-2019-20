@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
@@ -14,6 +17,8 @@ public class Vision {
 
     private GRIPVision grip = new GRIPVision();
 
+    private int cameraWidth;
+
     /**
      * Only run this once!
      */
@@ -21,7 +26,8 @@ public class Vision {
         new Thread(() -> {
 
             CvSink cvSink = CameraServer.getInstance().getVideo(camera);
-            CvSource outputStream = CameraServer.getInstance().putVideo("GRIP", camera.getVideoMode().width,
+            this.cameraWidth = camera.getVideoMode().width;
+            CvSource outputStream = CameraServer.getInstance().putVideo("GRIP", this.cameraWidth,
                     camera.getVideoMode().height);
 
             Mat source = new Mat();
@@ -35,7 +41,7 @@ public class Vision {
         }).start();
     }
 
-    public double findCenterX(int cameraWidth) {
+    public double findCenterX() {
 
         double centerX = 0.0d;
 
@@ -47,11 +53,38 @@ public class Vision {
         // Get the number of contours, and find their center X value
         for (MatOfPoint matpoint : grip.filterContoursOutput) {
             Rect r = Imgproc.boundingRect(matpoint);
-            centerX = ((r.x + r.width) - (r.width / 2) - (cameraWidth / 2));
+            centerX = ((r.x + r.width) - (r.width / 2) - (this.cameraWidth / 2));
         }
 
         return centerX;
 
+    }
+
+    public void trackTarget(double centerX, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower) {
+
+        double leftPower, rightPower;
+
+        int kP = this.cameraWidth;
+
+        rightPower = (centerX / kP);
+        leftPower = (-centerX / kP);
+
+        // Manage maxPower
+        rightPower = Vision.checkPower(rightPower, maxPower);
+        leftPower = Vision.checkPower(leftPower, maxPower);
+
+        leftDrive.set(ControlMode.PercentOutput, leftPower);
+        rightDrive.set(ControlMode.PercentOutput, rightPower);
+    }
+
+    private static double checkPower(double currentPower, double maxPower) {
+        if (currentPower > maxPower) {
+            return maxPower;
+        } else if (currentPower < -maxPower) {
+            return -maxPower;
+        } else {
+            return currentPower;
+        }
     }
 
 }
