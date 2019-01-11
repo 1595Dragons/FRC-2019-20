@@ -19,7 +19,7 @@ public class Vision {
 
     private int cameraWidth;
 
-    private double sumError, pastError;
+    private double errorSum;
 
     /**
      * Only run this once!
@@ -29,6 +29,7 @@ public class Vision {
 
             CvSink cvSink = CameraServer.getInstance().getVideo(camera);
             this.cameraWidth = camera.getVideoMode().width;
+            System.out.println("Camera width: " + this.cameraWidth);
             CvSource outputStream = CameraServer.getInstance().putVideo("GRIP", this.cameraWidth,
                     camera.getVideoMode().height);
 
@@ -62,26 +63,27 @@ public class Vision {
 
     }
 
-    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP,
-            double kI, double kD) {
+    public void findAngle() {
+        // TODO
+    }
+
+    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP, double kI) {
 
         double leftPower, rightPower;
 
-        double power = (error * kP) + (this.sumError * kI) + ((this.pastError - error) * kD);
+        double power = (error * kP) + (this.errorSum * kI);
 
         rightPower = power;
         leftPower = -power;
 
-        this.sumError += error;
-        this.pastError = error;
-
         // Manage maxPower
-        // TODO: Left motors seem to be grinding against each ther...
         rightPower = Vision.checkPower(rightPower, maxPower);
         leftPower = Vision.checkPower(leftPower, maxPower);
 
         leftDrive.set(ControlMode.PercentOutput, leftPower);
         rightDrive.set(ControlMode.PercentOutput, rightPower);
+
+        this.errorSum += error;
     }
 
     private static double checkPower(double currentPower, double maxPower) {
@@ -94,9 +96,8 @@ public class Vision {
         }
     }
 
-    public void resetError() {
-        this.pastError = 0;
-        this.sumError = 0;
+    public void resetPID() {
+        this.errorSum = 0.0d;
     }
 
 }

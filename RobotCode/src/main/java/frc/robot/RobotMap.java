@@ -21,35 +21,28 @@ import edu.wpi.first.wpilibj.XboxController;
 public class RobotMap {
 
 	// First, start with the ports for the Chicago robot
-	private final int chicagoLeftDrive1Port = 8, chicagoLeftDrive2Port = 11, chicagoRightDrive1Port = 7,
-			chicagoRightDrive2Port = 14, chicagoLeftIntakePort = 3, chicagoRightIntakePort = 2, flippyBoiPort = 9;
+	private final int leftDrive1Port = 8, leftDrive2Port = 11, rightDrive1Port = 7, rightDrive2Port = 14;
 
-	// Now, setup the motor objects that are used on both robots
-	TalonSRX leftDrive1, leftDrive2, rightDrive1, rightDrive2, leftIntake, rightIntake;
+	// Now, delcare the drive motors that are on the robot
+	public TalonSRX leftDrive1, leftDrive2, rightDrive1, rightDrive2;
 
-	// Setup motors that are used ONLY on the Chicago robot
-	TalonSRX flippyBoi;
-
-	// Also setup the controllers
-	XboxController gamepad1 = new XboxController(0), gamepad2 = new XboxController(1);
+	// Also setup the controllers for the drivers
+	public XboxController gamepad1 = new XboxController(0), gamepad2 = new XboxController(1);
 
 	// Init the robot map
-	RobotMap(RobotType type) {
+	RobotMap() {
 
-		// Apply port addresses based on robot
+		// Apply port addresses to the robot
+		leftDrive1 = new TalonSRX(leftDrive1Port);
+		leftDrive2 = new TalonSRX(leftDrive2Port);
+		rightDrive1 = new TalonSRX(rightDrive1Port);
+		rightDrive2 = new TalonSRX(rightDrive2Port);
 
-		// Setup the motors to go off of the Chicago robot's ports
-		leftDrive1 = new TalonSRX(chicagoLeftDrive1Port);
-		leftDrive2 = new TalonSRX(chicagoLeftDrive2Port);
-		rightDrive1 = new TalonSRX(chicagoRightDrive1Port);
-		rightDrive2 = new TalonSRX(chicagoRightDrive2Port);
-		leftIntake = new TalonSRX(chicagoLeftIntakePort);
-		rightIntake = new TalonSRX(chicagoRightIntakePort);
-		flippyBoi = new TalonSRX(flippyBoiPort);
+		// Set the secondary motors to follow the first ones
+		leftDrive2.set(ControlMode.Follower, leftDrive1Port);
+		rightDrive1.set(ControlMode.Follower, rightDrive1Port);
 
-		// Set the secondary drive motors to follow the OG motor
-		leftDrive2.set(ControlMode.Follower, chicagoLeftDrive1Port);
-		rightDrive2.set(ControlMode.Follower, chicagoRightDrive1Port);
+		// Invert necessary drive motors
 		leftDrive1.setInverted(true);
 
 	}
