@@ -19,6 +19,8 @@ public class Vision {
 
     private int cameraWidth;
 
+    private double sumError, pastError;
+
     /**
      * Only run this once!
      */
@@ -60,16 +62,21 @@ public class Vision {
 
     }
 
-    public void trackTarget(double centerX, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower) {
+    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP,
+            double kI, double kD) {
 
         double leftPower, rightPower;
 
-        int kP = this.cameraWidth;
+        double power = (error * kP) + (this.sumError * kI) + ((this.pastError - error) * kD);
 
-        rightPower = (centerX / kP);
-        leftPower = (-centerX / kP);
+        rightPower = power;
+        leftPower = -power;
+
+        this.sumError += error;
+        this.pastError = error;
 
         // Manage maxPower
+        // TODO: Left motors seem to be grinding against each ther...
         rightPower = Vision.checkPower(rightPower, maxPower);
         leftPower = Vision.checkPower(leftPower, maxPower);
 
@@ -85,6 +92,11 @@ public class Vision {
         } else {
             return currentPower;
         }
+    }
+
+    public void resetError() {
+        this.pastError = 0;
+        this.sumError = 0;
     }
 
 }
