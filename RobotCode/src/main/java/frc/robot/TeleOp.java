@@ -21,14 +21,14 @@ public class TeleOp {
     // For using a PID, centerX is our error
     private double kP, kI;
 
-    private final double initialKP = 0.015d, initialKI = 0.05d;
+    private final double initialKP = 0.015d, initialKI = 0.003d;
 
     /**
      * This is code that we only want to run <b>once</b>.
      */
     public void init() {
         SmartDashboard.putNumber("kP", this.initialKP);
-        SmartDashboard.getNumber("kI", this.initialKI);
+        SmartDashboard.putNumber("kI", this.initialKI);
     }
 
     /**
@@ -45,20 +45,14 @@ public class TeleOp {
         // Basic west coast drive code
         if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
             this.robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
-            this.robot.leftDrive2.set(ControlMode.PercentOutput, forward - turn);
             this.robot.rightDrive1.set(ControlMode.PercentOutput, forward + turn);
-            this.robot.rightDrive2.set(ControlMode.PercentOutput, forward + turn);
         } else {
             this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
-            this.robot.leftDrive2.set(ControlMode.PercentOutput, 0);
             this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
-            this.robot.rightDrive2.set(ControlMode.PercentOutput, 0);
         }
 
         SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
-        SmartDashboard.putNumber("Left drive 2 power", this.robot.leftDrive2.getMotorOutputPercent());
         SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
-        SmartDashboard.putNumber("Right drive 2 power", this.robot.rightDrive2.getMotorOutputPercent());
 
         // Try to get the center of the line for tracking
         try {

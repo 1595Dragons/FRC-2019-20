@@ -40,7 +40,7 @@ public class RobotMap {
 
 		// Set the secondary motors to follow the first ones
 		leftDrive2.set(ControlMode.Follower, leftDrive1Port);
-		rightDrive1.set(ControlMode.Follower, rightDrive1Port);
+		rightDrive2.set(ControlMode.Follower, rightDrive1Port);
 
 		// Invert necessary drive motors
 		leftDrive1.setInverted(true);
