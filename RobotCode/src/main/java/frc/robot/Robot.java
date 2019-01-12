@@ -27,14 +27,14 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 
 		// Setup the camera used for vision
+
+		// http://roborio-1595-frc.local:1181/?action=stream
 		visioncam = CameraServer.getInstance().startAutomaticCapture(0);
 		visioncam.setFPS(15);
 		visioncam.setBrightness(0);
 		visioncam.setWhiteBalanceManual(10000);
 		visioncam.setResolution(320, 240);
 		visioncam.setExposureManual(0);
-
-		// http://roborio-1595-frc.local:1181/?action=stream
 
 		// Setup the targeting vision system
 		try {

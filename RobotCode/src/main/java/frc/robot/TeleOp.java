@@ -36,6 +36,27 @@ public class TeleOp {
      */
     public void periodic(Vision vision) {
 
+        boolean visionTracking = SmartDashboard.getBoolean("Vision tracking", false);
+
+        // Toggle vision tracking
+        if (robot.gamepad1.getAButtonPressed()) {
+            SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
+        }
+
+        // Determine the drive methods
+        if (visionTracking) {
+            this.visionTrackDrive(vision);
+        } else {
+            this.westCoastDrive();
+        }
+
+        SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
+        SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
+
+    }
+
+    private void westCoastDrive() {
+
         // Calculate drive code, with turbo button
         double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft)
                 : robot.gamepad1.getY(Hand.kLeft) / 2,
@@ -51,26 +72,23 @@ public class TeleOp {
             this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
         }
 
-        SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
-        SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
+    }
 
-        // Try to get the center of the line for tracking
+    private void visionTrackDrive(Vision vision) {
         try {
+
             double centerX = vision.findCenterX();
             SmartDashboard.putNumber("Center X", centerX);
 
-            if (robot.gamepad1.getAButtonPressed()) {
-                SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
-            }
-
-            if (SmartDashboard.getBoolean("Vision tracking", false) && centerX != 0) {
+            if (centerX != 0) {
 
                 // Get the PID stuff
                 this.kP = SmartDashboard.getNumber("kP", this.initialKP);
                 this.kI = SmartDashboard.getNumber("kI", this.initialKI);
 
                 if (Math.abs(centerX) > 10) {
-                    vision.trackTarget(centerX / 10, this.robot.leftDrive1, this.robot.rightDrive1, 1, this.kP, this.kI);
+                    vision.trackTarget(centerX / 10, this.robot.leftDrive1, this.robot.rightDrive1, 1, this.kP,
+                            this.kI);
                 } else {
                     this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
                     this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
@@ -83,6 +101,8 @@ public class TeleOp {
         } catch (ConcurrentModificationException ignore) {
             // Just ignore these errors, but catch all others
         } catch (Exception e) {
+            // Disable vision tracking
+            SmartDashboard.putBoolean("Vision tracking", false);
             e.printStackTrace();
         }
     }
