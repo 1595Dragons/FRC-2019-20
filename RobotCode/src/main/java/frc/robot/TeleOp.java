@@ -19,9 +19,9 @@ public class TeleOp {
     private RobotMap robot = new RobotMap();
 
     // For using a PID, centerX is our error
-    private double kP, kI;
+    private double kP, kI, kD;
 
-    private final double initialKP = 0.015d, initialKI = 0.003d;
+    private final double initialKP = 0.0035d, initialKI = 0.001d, initialKD = 1.0d;
 
     /**
      * This is code that we only want to run <b>once</b>.
@@ -29,6 +29,7 @@ public class TeleOp {
     public void init() {
         SmartDashboard.putNumber("kP", this.initialKP);
         SmartDashboard.putNumber("kI", this.initialKI);
+        SmartDashboard.putNumber("kD", this.initialKD);
     }
 
     /**
@@ -85,16 +86,19 @@ public class TeleOp {
                 // Get the PID stuff
                 this.kP = SmartDashboard.getNumber("kP", this.initialKP);
                 this.kI = SmartDashboard.getNumber("kI", this.initialKI);
+                this.kD = SmartDashboard.getNumber("kD", this.initialKD);
 
                 if (Math.abs(centerX) > 10) {
-                    vision.trackTarget(centerX / 10, this.robot.leftDrive1, this.robot.rightDrive1, 1, this.kP,
-                            this.kI);
+                    vision.trackTarget(centerX, this.robot.leftDrive1, this.robot.rightDrive1, 1, this.kP,
+                            this.kI, this.kD);
                 } else {
                     this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
                     this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
                     vision.resetPID();
                 }
             } else {
+                this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
+                this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
                 vision.resetPID();
             }
 

@@ -12,6 +12,7 @@ import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Vision {
 
@@ -19,7 +20,9 @@ public class Vision {
 
     private int cameraWidth;
 
-    private double errorSum;
+    private double errorSum, lastError;
+
+    private long lastTime;
 
     /**
      * Only run this once!
@@ -38,7 +41,7 @@ public class Vision {
             while (!Thread.interrupted()) {
                 if (cvSink.grabFrame(source) != 0) {
                     grip.process(source);
-                    outputStream.putFrame(grip.maskOutput());
+                    outputStream.putFrame(grip.cvErodeOutput());
                 }
             }
         }).start();
@@ -67,11 +70,27 @@ public class Vision {
         // TODO
     }
 
-    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP, double kI) {
+    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP, double kI, double kD) {
 
         double leftPower, rightPower;
 
-        double power = (error * kP) + (this.errorSum * kI);
+        long currentTime = System.currentTimeMillis() % 1000;
+
+        double p =  (error * kP);
+        SmartDashboard.putNumber("Calculated p", p);
+
+        double i = 0.0;
+        if (error < 30) {
+            i = (this.errorSum * kI);
+        } else {
+            this.errorSum = 0;
+        }
+        SmartDashboard.putNumber("Calculated i", i);
+
+        double d = (((this.lastError - error)/(this.lastTime - currentTime)) * kD);
+        SmartDashboard.putNumber("Calculated d", d);
+
+        double power = p + i + d;
 
         rightPower = power;
         leftPower = -power;
@@ -83,7 +102,8 @@ public class Vision {
         leftDrive.set(ControlMode.PercentOutput, leftPower);
         rightDrive.set(ControlMode.PercentOutput, rightPower);
 
-        this.errorSum += error;
+        this.errorSum += (error * (this.lastTime - currentTime));
+        this.lastTime = currentTime;
     }
 
     private static double checkPower(double currentPower, double maxPower) {
@@ -98,6 +118,7 @@ public class Vision {
 
     public void resetPID() {
         this.errorSum = 0.0d;
+        this.lastError = 0.0d;
     }
 
 }
