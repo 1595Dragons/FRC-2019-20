@@ -21,7 +21,9 @@ public class TeleOp {
     // For using a PID, centerX is our error
     private double kP, kI, kD;
 
-    private final double initialKP = 0.0035d, initialKI = 0.001d, initialKD = 1.0d;
+    private Tracking tracking;
+
+    private final double initialKP = 0.02d, initialKI = 3.0E-4d, initialKD = 0.0d;
 
     /**
      * This is code that we only want to run <b>once</b>.
@@ -30,6 +32,7 @@ public class TeleOp {
         SmartDashboard.putNumber("kP", this.initialKP);
         SmartDashboard.putNumber("kI", this.initialKI);
         SmartDashboard.putNumber("kD", this.initialKD);
+        tracking = new Tracking(kP, kI, kD);
     }
 
     /**
@@ -78,28 +81,41 @@ public class TeleOp {
     private void visionTrackDrive(Vision vision) {
         try {
 
-            double centerX = vision.findCenterX();
-            SmartDashboard.putNumber("Center X", centerX);
+            double centerX = vision.getDegree(vision.findCenterX());
+            SmartDashboard.putNumber("Degrees", centerX);
 
             if (centerX != 0) {
 
-                // Get the PID stuff
-                this.kP = SmartDashboard.getNumber("kP", this.initialKP);
-                this.kI = SmartDashboard.getNumber("kI", this.initialKI);
-                this.kD = SmartDashboard.getNumber("kD", this.initialKD);
+                // Check for a change in PID values
+                if (SmartDashboard.getNumber("kP", this.initialKP) != this.kP) {
+                    System.out.printf("Updating kP from %s to %s\n", this.kP, SmartDashboard.getNumber("kP", this.initialKP));
+                    this.kP = SmartDashboard.getNumber("kP", this.initialKP);
+                    tracking.pid.setP(this.kP);
+                }
 
-                if (Math.abs(centerX) > 10) {
-                    vision.trackTarget(centerX, this.robot.leftDrive1, this.robot.rightDrive1, 1, this.kP,
-                            this.kI, this.kD);
+                if (SmartDashboard.getNumber("kI", this.initialKI) != this.kI) {
+                    System.out.printf("Updating kI from %s to %s\n", this.kI, SmartDashboard.getNumber("kI", this.initialKI));
+                    this.kI = SmartDashboard.getNumber("kI", this.initialKI);
+                    tracking.pid.setI(this.kI);
+                }
+                
+                if (SmartDashboard.getNumber("kD", this.initialKD) != this.kD) {
+                    System.out.printf("Updating kD from %s to %s\n", this.kD, SmartDashboard.getNumber("kD", this.initialKD));
+                    this.kD = SmartDashboard.getNumber("kD", this.initialKD);
+                    tracking.pid.setD(this.kD);
+                }
+
+                if (Math.abs(centerX) > 2) {
+                    tracking.track(this.robot.leftDrive1, this.robot.rightDrive1, centerX);
                 } else {
                     this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
                     this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
-                    vision.resetPID();
+                    tracking.pid.reset();
                 }
             } else {
                 this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
                 this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
-                vision.resetPID();
+                tracking.pid.reset();
             }
 
         } catch (ConcurrentModificationException ignore) {

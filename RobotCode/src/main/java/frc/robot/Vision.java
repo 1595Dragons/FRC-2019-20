@@ -12,6 +12,9 @@ import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Vision {
@@ -70,8 +73,10 @@ public class Vision {
         // TODO
     }
 
-    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double maxPower, double kP, double kI, double kD) {
+	@Deprecated
+    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double kP, double kI, double kD) {
 
+		
         double leftPower, rightPower;
 
         long currentTime = System.currentTimeMillis() % 1000;
@@ -80,7 +85,7 @@ public class Vision {
         SmartDashboard.putNumber("Calculated p", p);
 
         double i = 0.0;
-        if (error < 30) {
+        if (Math.abs(error) < 60) {
             i = (this.errorSum * kI);
         } else {
             this.errorSum = 0;
@@ -95,17 +100,20 @@ public class Vision {
         rightPower = power;
         leftPower = -power;
 
-        // Manage maxPower
-        rightPower = Vision.checkPower(rightPower, maxPower);
-        leftPower = Vision.checkPower(leftPower, maxPower);
-
         leftDrive.set(ControlMode.PercentOutput, leftPower);
-        rightDrive.set(ControlMode.PercentOutput, rightPower);
-
-        this.errorSum += (error * (this.lastTime - currentTime));
-        this.lastTime = currentTime;
+		rightDrive.set(ControlMode.PercentOutput, rightPower);
+		
+		if (Math.abs(error) < 60) {
+			this.errorSum += (error * (this.lastTime - currentTime));
+		} else {
+			this.errorSum = 0;
+		}
+		this.lastError = error;
+		this.lastTime = currentTime;
+		
     }
 
+	@Deprecated
     private static double checkPower(double currentPower, double maxPower) {
         if (currentPower > maxPower) {
             return maxPower;
@@ -116,9 +124,14 @@ public class Vision {
         }
     }
 
+	@Deprecated
     public void resetPID() {
         this.errorSum = 0.0d;
         this.lastError = 0.0d;
-    }
+	}
+	
+	public double getDegree(double centerX) {
+		return (0.2*centerX)-1;
+	}
 
 }
