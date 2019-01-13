@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -20,10 +21,12 @@ public class TeleOp {
 
     // For using a PID, centerX is our error
     private double kP, kI, kD;
+    private final double initialKP = 0.02d, initialKI = 3.0E-4d, initialKD = 0.0d;
+
+    // Get the status of the vision stick
+    private boolean canSeeTarget;
 
     private Tracking tracking;
-
-    private final double initialKP = 0.02d, initialKI = 3.0E-4d, initialKD = 0.0d;
 
     /**
      * This is code that we only want to run <b>once</b>.
@@ -33,6 +36,7 @@ public class TeleOp {
         SmartDashboard.putNumber("kI", this.initialKI);
         SmartDashboard.putNumber("kD", this.initialKD);
         tracking = new Tracking(kP, kI, kD);
+        System.out.println("Cos of 90: " + Math.cos(90));
     }
 
     /**
@@ -43,7 +47,7 @@ public class TeleOp {
         boolean visionTracking = SmartDashboard.getBoolean("Vision tracking", false);
 
         // Toggle vision tracking
-        if (robot.gamepad1.getAButtonPressed()) {
+        if (robot.gamepad1.getBumperPressed(Hand.kLeft) || robot.gamepad1.getBumperPressed(Hand.kRight)) {
             SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
         }
 
@@ -52,7 +56,13 @@ public class TeleOp {
             this.visionTrackDrive(vision);
         } else {
             this.westCoastDrive();
+            this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.0d);
+                this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.0d);
         }
+
+        // Get whether or not the robot can see the target
+        this.canSeeTarget = vision.numberOfTargets() != 0;
+        SmartDashboard.putBoolean("Can see vision stick", canSeeTarget);
 
         SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
         SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
@@ -81,42 +91,54 @@ public class TeleOp {
     private void visionTrackDrive(Vision vision) {
         try {
 
-            double centerX = vision.getDegree(vision.findCenterX());
-            SmartDashboard.putNumber("Degrees", centerX);
+            double pidPower;
+            if (this.canSeeTarget) {
 
-            if (centerX != 0) {
+                this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.5d);
+                this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.5d);
+
+                double centerX = vision.getDegree(vision.findCenterX());
+                SmartDashboard.putNumber("Degrees", centerX);
+                SmartDashboard.putNumber("Width", vision.getTargetWidth());
+                SmartDashboard.putNumber("Distance", vision.getDistance());
 
                 // Check for a change in PID values
                 if (SmartDashboard.getNumber("kP", this.initialKP) != this.kP) {
-                    System.out.printf("Updating kP from %s to %s\n", this.kP, SmartDashboard.getNumber("kP", this.initialKP));
+                    System.out.printf("Updating kP from %s to %s\n", this.kP,
+                            SmartDashboard.getNumber("kP", this.initialKP));
                     this.kP = SmartDashboard.getNumber("kP", this.initialKP);
                     tracking.pid.setP(this.kP);
                 }
 
                 if (SmartDashboard.getNumber("kI", this.initialKI) != this.kI) {
-                    System.out.printf("Updating kI from %s to %s\n", this.kI, SmartDashboard.getNumber("kI", this.initialKI));
+                    System.out.printf("Updating kI from %s to %s\n", this.kI,
+                            SmartDashboard.getNumber("kI", this.initialKI));
                     this.kI = SmartDashboard.getNumber("kI", this.initialKI);
                     tracking.pid.setI(this.kI);
                 }
-                
+
                 if (SmartDashboard.getNumber("kD", this.initialKD) != this.kD) {
-                    System.out.printf("Updating kD from %s to %s\n", this.kD, SmartDashboard.getNumber("kD", this.initialKD));
+                    System.out.printf("Updating kD from %s to %s\n", this.kD,
+                            SmartDashboard.getNumber("kD", this.initialKD));
                     this.kD = SmartDashboard.getNumber("kD", this.initialKD);
                     tracking.pid.setD(this.kD);
                 }
 
                 if (Math.abs(centerX) > 2) {
-                    tracking.track(this.robot.leftDrive1, this.robot.rightDrive1, centerX);
+                    pidPower = tracking.trackTurnPower(centerX);
                 } else {
-                    this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
-                    this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
+                    pidPower = 0;
                     tracking.pid.reset();
                 }
             } else {
-                this.robot.leftDrive1.set(ControlMode.PercentOutput, 0);
-                this.robot.rightDrive1.set(ControlMode.PercentOutput, 0);
+                this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.25d);
+                this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.25d);
+                pidPower = 0;
                 tracking.pid.reset();
             }
+
+            this.robot.leftDrive1.set(ControlMode.PercentOutput, this.robot.gamepad1.getY(Hand.kLeft) / 2 + pidPower);
+            this.robot.rightDrive1.set(ControlMode.PercentOutput, this.robot.gamepad1.getY(Hand.kLeft) / 2 - pidPower);
 
         } catch (ConcurrentModificationException ignore) {
             // Just ignore these errors, but catch all others

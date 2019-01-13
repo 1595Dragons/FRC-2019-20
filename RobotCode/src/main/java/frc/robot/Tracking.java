@@ -14,7 +14,7 @@ public class Tracking {
         pid.setOutputLimits(-1, 1);
     }
 
-    public void track(TalonSRX leftMotor, TalonSRX rightMotor, double error) {
+    public void trackTurn(TalonSRX leftMotor, TalonSRX rightMotor, double error) {
         double power = pid.getOutput(error);
         SmartDashboard.putNumber("PID power", power);
 
@@ -22,5 +22,10 @@ public class Tracking {
         leftMotor.set(ControlMode.PercentOutput, power);
     }
 
+    public double trackTurnPower(double error) {
+        double power = pid.getOutput(error);
+        SmartDashboard.putNumber("PID power", power);
+        return power;
+    }
 
 }

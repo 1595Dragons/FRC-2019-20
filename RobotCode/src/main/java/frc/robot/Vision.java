@@ -1,8 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
@@ -12,10 +9,6 @@ import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Vision {
 
@@ -23,9 +16,7 @@ public class Vision {
 
     private int cameraWidth;
 
-    private double errorSum, lastError;
-
-    private long lastTime;
+    private double targetWidth, targetHeight;
 
     /**
      * Only run this once!
@@ -62,76 +53,33 @@ public class Vision {
         // Get the number of contours, and find their center X value
         for (MatOfPoint matpoint : grip.filterContoursOutput) {
             Rect r = Imgproc.boundingRect(matpoint);
+            this.targetWidth = r.width;
+            this.targetHeight = r.height;
             centerX = ((r.x + r.width) - (r.width / 2) - (this.cameraWidth / 2));
         }
 
         return centerX;
 
     }
-
-    public void findAngle() {
-        // TODO
-    }
-
-	@Deprecated
-    public void trackTarget(double error, TalonSRX leftDrive, TalonSRX rightDrive, double kP, double kI, double kD) {
-
-		
-        double leftPower, rightPower;
-
-        long currentTime = System.currentTimeMillis() % 1000;
-
-        double p =  (error * kP);
-        SmartDashboard.putNumber("Calculated p", p);
-
-        double i = 0.0;
-        if (Math.abs(error) < 60) {
-            i = (this.errorSum * kI);
-        } else {
-            this.errorSum = 0;
-        }
-        SmartDashboard.putNumber("Calculated i", i);
-
-        double d = (((this.lastError - error)/(this.lastTime - currentTime)) * kD);
-        SmartDashboard.putNumber("Calculated d", d);
-
-        double power = p + i + d;
-
-        rightPower = power;
-        leftPower = -power;
-
-        leftDrive.set(ControlMode.PercentOutput, leftPower);
-		rightDrive.set(ControlMode.PercentOutput, rightPower);
-		
-		if (Math.abs(error) < 60) {
-			this.errorSum += (error * (this.lastTime - currentTime));
-		} else {
-			this.errorSum = 0;
-		}
-		this.lastError = error;
-		this.lastTime = currentTime;
-		
-    }
-
-	@Deprecated
-    private static double checkPower(double currentPower, double maxPower) {
-        if (currentPower > maxPower) {
-            return maxPower;
-        } else if (currentPower < -maxPower) {
-            return -maxPower;
-        } else {
-            return currentPower;
-        }
-    }
-
-	@Deprecated
-    public void resetPID() {
-        this.errorSum = 0.0d;
-        this.lastError = 0.0d;
-	}
 	
 	public double getDegree(double centerX) {
 		return (0.2*centerX)-1;
-	}
+    }
+    
+    public double getTargetWidth() {
+        return this.targetWidth;
+    }
+
+    public double getTargetHeight() {
+        return this.targetHeight;
+    }
+
+    public int numberOfTargets() {
+        return grip.filterContoursOutput.size();
+    }
+
+    public int getDistance() {
+        return this.grip.maskOutput().depth();
+    }
 
 }
