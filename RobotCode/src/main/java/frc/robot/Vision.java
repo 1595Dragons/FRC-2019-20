@@ -18,6 +18,9 @@ public class Vision {
 
     private double targetWidth, targetHeight;
 
+    // This is the full FOV of the camera (Or 2 theta)
+    private final double FOV = 68.5d;
+
     /**
      * Only run this once!
      */
@@ -78,8 +81,15 @@ public class Vision {
         return grip.filterContoursOutput.size();
     }
 
-    public int getDistance() {
-        return this.grip.maskOutput().depth();
+    /**
+     * @param center center of object (in pixels)
+     */
+    public double getDistance(double center) {
+        double x = this.cameraWidth - center;
+
+        double pixelsPerInch = this.targetWidth/2; // The target is a known 2 inches
+
+        return (x/Math.tan(Math.toRadians(this.FOV/2))) * pixelsPerInch;
     }
 
 }

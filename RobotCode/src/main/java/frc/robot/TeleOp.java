@@ -21,12 +21,14 @@ public class TeleOp {
 
     // For using a PID, centerX is our error
     private double kP, kI, kD;
-    private final double initialKP = 0.02d, initialKI = 3.0E-4d, initialKD = 0.0d;
+    private final double initialKP = 0.02d, initialKI = 4.0E-4d, initialKD = 0.0d;
 
     // Get the status of the vision stick
     private boolean canSeeTarget;
 
     private Tracking tracking;
+
+    private double centerX;
 
     /**
      * This is code that we only want to run <b>once</b>.
@@ -57,12 +59,19 @@ public class TeleOp {
         } else {
             this.westCoastDrive();
             this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.0d);
-                this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.0d);
+            this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.0d);
         }
 
         // Get whether or not the robot can see the target
         this.canSeeTarget = vision.numberOfTargets() != 0;
         SmartDashboard.putBoolean("Can see vision stick", canSeeTarget);
+
+        if (this.canSeeTarget) {
+            this.centerX = vision.findCenterX();
+            SmartDashboard.putNumber("Degrees", vision.getDegree(centerX));
+            SmartDashboard.putNumber("Width", vision.getTargetWidth());
+            SmartDashboard.putNumber("Distance", vision.getDistance(centerX));
+        }
 
         SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
         SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
@@ -97,11 +106,6 @@ public class TeleOp {
                 this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.5d);
                 this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.5d);
 
-                double centerX = vision.getDegree(vision.findCenterX());
-                SmartDashboard.putNumber("Degrees", centerX);
-                SmartDashboard.putNumber("Width", vision.getTargetWidth());
-                SmartDashboard.putNumber("Distance", vision.getDistance());
-
                 // Check for a change in PID values
                 if (SmartDashboard.getNumber("kP", this.initialKP) != this.kP) {
                     System.out.printf("Updating kP from %s to %s\n", this.kP,
@@ -124,8 +128,8 @@ public class TeleOp {
                     tracking.pid.setD(this.kD);
                 }
 
-                if (Math.abs(centerX) > 2) {
-                    pidPower = tracking.trackTurnPower(centerX);
+                if (Math.abs(this.centerX) > 2) {
+                    pidPower = tracking.trackTurnPower(vision.getDegree(this.centerX));
                 } else {
                     pidPower = 0;
                     tracking.pid.reset();
