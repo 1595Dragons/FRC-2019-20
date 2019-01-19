@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class TeleOp {
 
-    private RobotMap robot = new RobotMap();
+    private RobotMap robot;
 
     // For using a PID, centerX is our error
     private double kP, kI, kD;
@@ -29,6 +29,11 @@ public class TeleOp {
     private Tracking tracking;
 
     private double centerX;
+
+
+    public TeleOp(RobotMap robot) {
+        this.robot = robot;
+    }
 
     /**
      * This is code that we only want to run <b>once</b>.
@@ -75,6 +80,10 @@ public class TeleOp {
 
         SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
         SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
+
+        // Hatch mechanism
+        this.robot.hatchClamp.set(this.robot.gamepad1.getAButtonPressed());
+		this.robot.hatchRelease.set(this.robot.gamepad1.getBButtonPressed());
 
     }
 

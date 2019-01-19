@@ -10,6 +10,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
@@ -21,13 +22,17 @@ import edu.wpi.first.wpilibj.XboxController;
 public class RobotMap {
 
 	// First, start with the ports for the Chicago robot
-	private final int leftDrive1Port = 8, leftDrive2Port = 11, rightDrive1Port = 7, rightDrive2Port = 14;
+	private final int leftDrive1Port = 8, leftDrive2Port = 11, rightDrive1Port = 7, rightDrive2Port = 14,
+			solenoidOnPort = 0, solenoidOffPort = 1;
 
 	// Now, delcare the drive motors that are on the robot
 	public TalonSRX leftDrive1, leftDrive2, rightDrive1, rightDrive2;
 
 	// Also setup the controllers for the drivers
 	public XboxController gamepad1 = new XboxController(0), gamepad2 = new XboxController(1);
+
+	// Setup the pnumatics
+	Solenoid hatchRelease, hatchClamp;
 
 	// Init the robot map
 	RobotMap() {
@@ -45,5 +50,8 @@ public class RobotMap {
 		// Invert necessary drive motors
 		leftDrive1.setInverted(true);
 
+		// Setup solenoids
+		hatchClamp = new Solenoid(solenoidOnPort);
+		hatchRelease = new Solenoid(solenoidOffPort);
 	}
 }

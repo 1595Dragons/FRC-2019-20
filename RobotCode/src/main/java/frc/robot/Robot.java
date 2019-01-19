@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 public class Robot extends TimedRobot {
 
-	private TeleOp teleOp = new TeleOp();
+	private RobotMap robot = new RobotMap();
+
+	private TeleOp teleOp = new TeleOp(robot);
 
 	private Vision vision = new Vision();
 
