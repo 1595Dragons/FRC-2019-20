@@ -8,6 +8,7 @@ package frc.robot;
 /*----------------------------------------------------------------------------*/
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.Solenoid;
@@ -42,6 +43,11 @@ public class RobotMap {
 		leftDrive2 = new TalonSRX(leftDrive2Port);
 		rightDrive1 = new TalonSRX(rightDrive1Port);
 		rightDrive2 = new TalonSRX(rightDrive2Port);
+
+		// Setup encoders
+		leftDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		rightDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+
 
 		// Set the secondary motors to follow the first ones
 		leftDrive2.set(ControlMode.Follower, leftDrive1Port);

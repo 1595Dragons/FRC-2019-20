@@ -4,8 +4,11 @@ import java.util.ConcurrentModificationException;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import edu.wpi.first.wpilibj.AnalogAccelerometer;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -29,7 +32,6 @@ public class TeleOp {
     private Tracking tracking;
 
     private double centerX;
-
 
     public TeleOp(RobotMap robot) {
         this.robot = robot;
@@ -83,7 +85,7 @@ public class TeleOp {
 
         // Hatch mechanism
         this.robot.hatchClamp.set(this.robot.gamepad1.getAButtonPressed());
-		this.robot.hatchRelease.set(this.robot.gamepad1.getBButtonPressed());
+        this.robot.hatchRelease.set(this.robot.gamepad1.getBButtonPressed());
 
     }
 

@@ -10,12 +10,15 @@ package frc.robot;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
 	private RobotMap robot = new RobotMap();
 
-	private TeleOp teleOp = new TeleOp(robot);
+	private TeleOp teleOp = new TeleOp(this.robot);
+
+	private circlePath autonomous = new circlePath(this.robot);
 
 	private Vision vision = new Vision();
 
@@ -27,6 +30,14 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
+
+		// Set the endcoders to 0
+		try {
+			robot.rightDrive1.setSelectedSensorPosition(0);
+			robot.leftDrive1.setSelectedSensorPosition(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		// Setup the camera used for vision
 
@@ -49,7 +60,12 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotPeriodic() {
-
+		try {
+			SmartDashboard.putNumber("Left position", robot.leftDrive1.getSelectedSensorPosition());
+			SmartDashboard.putNumber("Right position", robot.rightDrive1.getSelectedSensorPosition());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -81,7 +97,11 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-
+		try {
+			autonomous.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -89,7 +109,11 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-
+		try {
+			autonomous.periodic();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void teleopInit() {
