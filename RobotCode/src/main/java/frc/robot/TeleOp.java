@@ -94,6 +94,12 @@ public class TeleOp {
                 turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
                         : robot.gamepad1.getX(Hand.kRight) / 2;
 
+        // Check if tristan mode is enabled
+        if (Robot.tristanMode) {
+            forward = forward/5;
+            turn = turn/5;
+        }
+
         // Basic west coast drive code
         if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
             this.robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);

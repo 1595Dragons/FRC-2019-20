@@ -22,6 +22,8 @@ public class Robot extends TimedRobot {
 
 	private Vision vision = new Vision();
 
+	public static boolean tristanMode = false;
+
 	private UsbCamera visioncam;
 
 	/**
@@ -43,11 +45,12 @@ public class Robot extends TimedRobot {
 
 		// http://roborio-1595-frc.local:1181/?action=stream
 		visioncam = CameraServer.getInstance().startAutomaticCapture(0);
+		// For now, just use basic vision for driving
 		visioncam.setFPS(15);
-		visioncam.setBrightness(0);
-		visioncam.setWhiteBalanceManual(10000);
+		//visioncam.setBrightness(0);
+		//visioncam.setWhiteBalanceManual(10000);
 		visioncam.setResolution(320, 240);
-		visioncam.setExposureManual(0);
+		//visioncam.setExposureManual(0);
 
 		// Setup the targeting vision system
 		try {
@@ -63,6 +66,11 @@ public class Robot extends TimedRobot {
 		try {
 			SmartDashboard.putNumber("Left position", robot.leftDrive1.getSelectedSensorPosition());
 			SmartDashboard.putNumber("Right position", robot.rightDrive1.getSelectedSensorPosition());
+
+			// Check for tristan mode
+			if (this.robot.gamepad1.getStartButtonPressed()) {
+				Robot.tristanMode = !Robot.tristanMode;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

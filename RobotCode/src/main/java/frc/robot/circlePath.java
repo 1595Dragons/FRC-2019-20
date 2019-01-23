@@ -19,7 +19,7 @@ public class circlePath {
     private static final double k_wheel_diameter = 0.1524d; // 6 inches to meters
     private static final double k_max_velocity = 2.794d; // 110 inches to meters
 
-    private final String k_path_name = "Return to start";
+    private final String k_path_name = "returnToStart";
 
     private Notifier m_follower_notifier;
 
@@ -35,7 +35,7 @@ public class circlePath {
     public void init() {
         this.gyro = new AHRS(SPI.Port.kMXP);
 
-        // TODO: Error with trajectories
+        // TODO: Files are not being deployed?
         Trajectory left_trajectory = PathfinderFRC.getTrajectory(this.k_path_name + ".left");
         Trajectory right_trajectory = PathfinderFRC.getTrajectory(this.k_path_name + ".right");
 
