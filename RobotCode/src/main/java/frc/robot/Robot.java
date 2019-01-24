@@ -18,7 +18,13 @@ public class Robot extends TimedRobot {
 
 	public static boolean tristanMode = false;
 
+	/**
+	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the watch dog...
+	 * 
+	 * Man that sounds bad :(
+	 */
 	public Robot() {
+		super(0.04d);
 	}
 
 	/**
