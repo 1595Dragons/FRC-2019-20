@@ -50,7 +50,12 @@ public class TeleOp {
      */
     public void periodic(Vision vision) {
 
-        boolean visionTracking = SmartDashboard.getBoolean("Vision tracking", false);
+        boolean visionTracking;
+        if (this.robot.isVisionSupported) {
+            visionTracking = SmartDashboard.getBoolean("Vision tracking", false);
+        } else {
+            visionTracking = false;
+        }
 
         // Toggle vision tracking
         if (robot.gamepad1.getBumperPressed(Hand.kLeft) || robot.gamepad1.getBumperPressed(Hand.kRight)) {
@@ -58,7 +63,7 @@ public class TeleOp {
         }
 
         // Determine the drive methods
-        if (visionTracking) {
+        if (visionTracking && this.robot.isVisionSupported) {
             this.visionTrackDrive(vision);
         } else {
             this.westCoastDrive();
@@ -66,23 +71,29 @@ public class TeleOp {
             this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.0d);
         }
 
+        // Hatch mechanism
+        if (this.robot.gamepad1.getTriggerAxis(Hand.kLeft) > 0.1d || this.robot.gamepad1.getAButtonPressed()) {
+            this.robot.secureHatchPanel();
+        }
+        if (this.robot.gamepad1.getTriggerAxis(Hand.kRight) > 0.1d || this.robot.gamepad1.getBButtonPressed()) {
+            this.robot.releaseHatchPanel();
+        }
+
         // Get whether or not the robot can see the target
         this.canSeeTarget = vision.numberOfTargets() != 0;
         SmartDashboard.putBoolean("Can see vision stick", canSeeTarget);
 
-        if (this.canSeeTarget) {
-            this.centerX = vision.findCenterX();
-            SmartDashboard.putNumber("Degrees", vision.getDegree(centerX));
-            SmartDashboard.putNumber("Width", vision.getTargetWidth());
-            SmartDashboard.putNumber("Distance", vision.getDistance(centerX));
+        if (this.robot.isVisionSupported) {
+            if (this.canSeeTarget) {
+                this.centerX = vision.findCenterX();
+                SmartDashboard.putNumber("Degrees", vision.getDegree(centerX));
+                SmartDashboard.putNumber("Width", vision.getTargetWidth());
+                SmartDashboard.putNumber("Distance", vision.getDistance(centerX));
+            }
         }
 
         SmartDashboard.putNumber("Left drive 1 power", this.robot.leftDrive1.getMotorOutputPercent());
         SmartDashboard.putNumber("Right drive 1 power", this.robot.rightDrive1.getMotorOutputPercent());
-
-        // Hatch mechanism
-        this.robot.hatchClamp.set(this.robot.gamepad1.getAButtonPressed());
-        this.robot.hatchRelease.set(this.robot.gamepad1.getBButtonPressed());
 
     }
 
@@ -90,18 +101,23 @@ public class TeleOp {
 
         // Calculate drive code, with turbo button
         double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft)
-                : robot.gamepad1.getY(Hand.kLeft) / 2,
-                turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
+                : robot.gamepad1.getY(Hand.kLeft) / 2, turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
                         : robot.gamepad1.getX(Hand.kRight) / 2;
+
+                        
+        // Check if there should be turning percision
+        if (this.robot.gamepad1.getStickButton(Hand.kRight)) {
+            turn /= 2;
+        }
 
         // Check if tristan mode is enabled
         if (Robot.tristanMode) {
-            forward = forward/5;
-            turn = turn/5;
+            forward = forward / 5;
+            turn = turn / 5;
         }
 
         // Basic west coast drive code
-        if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
+        if (Math.abs(forward) > 0.02d || Math.abs(turn) > 0.02d) {
             this.robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
             this.robot.rightDrive1.set(ControlMode.PercentOutput, forward + turn);
         } else {

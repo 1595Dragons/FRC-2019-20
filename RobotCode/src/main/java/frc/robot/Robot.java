@@ -33,15 +33,16 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotInit() {
 
-		// Set the endcoders to 0
+		
 		try {
+			// Set the endcoders to 0
 			robot.rightDrive1.setSelectedSensorPosition(0);
 			robot.leftDrive1.setSelectedSensorPosition(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		// Setup the camera used for vision
+			SmartDashboard.putBoolean("Enable vision", true);
+
+
+			// Setup the camera used for vision
 
 		// http://roborio-1595-frc.local:1181/?action=stream
 		visioncam = CameraServer.getInstance().startAutomaticCapture(0);
@@ -53,12 +54,10 @@ public class Robot extends TimedRobot {
 		//visioncam.setExposureManual(0);
 
 		// Setup the targeting vision system
-		try {
-			vision.generateTargetImage(visioncam);
+		vision.generateTargetImage(visioncam);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override
@@ -67,6 +66,12 @@ public class Robot extends TimedRobot {
 			SmartDashboard.putNumber("Left position", robot.leftDrive1.getSelectedSensorPosition());
 			SmartDashboard.putNumber("Right position", robot.rightDrive1.getSelectedSensorPosition());
 
+			if (this.robot.isVisionSupported != SmartDashboard.getBoolean("Enable vision", true)) {
+				this.robot.isVisionSupported = SmartDashboard.getBoolean("Enable vision", true);
+				System.out.println("Updating vision support");
+			}
+
+			
 			// Check for tristan mode
 			if (this.robot.gamepad1.getStartButtonPressed()) {
 				Robot.tristanMode = !Robot.tristanMode;
@@ -124,6 +129,7 @@ public class Robot extends TimedRobot {
 		}
 	}
 
+	@Override
 	public void teleopInit() {
 		try {
 			teleOp.init();
@@ -132,12 +138,18 @@ public class Robot extends TimedRobot {
 		}
 	}
 
+	@Override
 	public void teleopPeriodic() {
 		try {
 			teleOp.periodic(vision);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void testInit() {
+		
 	}
 
 	/**

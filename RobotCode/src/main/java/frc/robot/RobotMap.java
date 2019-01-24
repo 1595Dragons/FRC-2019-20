@@ -35,29 +35,43 @@ public class RobotMap {
 	// Setup the pnumatics
 	Solenoid hatchRelease, hatchClamp;
 
+	// Is vision supported in driver station?
+	// (Default is true)
+	public boolean isVisionSupported = true;
+
 	// Init the robot map
 	RobotMap() {
 
 		// Apply port addresses to the robot
-		leftDrive1 = new TalonSRX(leftDrive1Port);
-		leftDrive2 = new TalonSRX(leftDrive2Port);
-		rightDrive1 = new TalonSRX(rightDrive1Port);
-		rightDrive2 = new TalonSRX(rightDrive2Port);
+		this.leftDrive1 = new TalonSRX(this.leftDrive1Port);
+		this.leftDrive2 = new TalonSRX(this.leftDrive2Port);
+		this.rightDrive1 = new TalonSRX(this.rightDrive1Port);
+		this.rightDrive2 = new TalonSRX(this.rightDrive2Port);
 
 		// Setup encoders
-		leftDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		rightDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		this.leftDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		this.rightDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 
 		// Set the secondary motors to follow the first ones
-		leftDrive2.set(ControlMode.Follower, leftDrive1Port);
-		rightDrive2.set(ControlMode.Follower, rightDrive1Port);
+		this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
+		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
 
 		// Invert necessary drive motors
-		leftDrive1.setInverted(true);
+		this.leftDrive1.setInverted(true);
 
 		// Setup solenoids
-		hatchClamp = new Solenoid(solenoidOnPort);
-		hatchRelease = new Solenoid(solenoidOffPort);
+		this.hatchClamp = new Solenoid(this.solenoidOnPort);
+		this.hatchRelease = new Solenoid(this.solenoidOffPort);
+		this.hatchClamp.setPulseDuration(0.5d);
+		this.hatchRelease.setPulseDuration(0.5d);
+	}
+
+	public void releaseHatchPanel() {
+		this.hatchRelease.startPulse();;
+	}
+
+	public void secureHatchPanel() {
+		this.hatchClamp.startPulse();
 	}
 }
