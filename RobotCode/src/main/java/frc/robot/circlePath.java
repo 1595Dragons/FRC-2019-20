@@ -15,9 +15,9 @@ public class circlePath {
 
     private RobotMap robot;
 
-    private static final int k_ticks_per_rev = 4060;
-    private static final double k_wheel_diameter = 0.1524d; // 6 inches to meters
-    private static final double k_max_velocity = 2.794d; // 110 inches to meters
+    private final int k_ticks_per_rev = 4060;
+    private final double k_wheel_diameter = 0.1524d; // 6 inches to meters
+    private final double k_max_velocity = 2.794d; // 110 inches to meters
 
     private final String k_path_name = "returnToStart";
 

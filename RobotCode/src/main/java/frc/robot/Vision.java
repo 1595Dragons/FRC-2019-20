@@ -12,6 +12,8 @@ import edu.wpi.first.cameraserver.CameraServer;
 
 public class Vision {
 
+    public boolean isRunning = false;
+
     private GRIPVision grip = new GRIPVision();
 
     private int cameraWidth;
@@ -25,6 +27,7 @@ public class Vision {
      * Only run this once!
      */
     public void generateTargetImage(VideoSource camera) {
+        this.isRunning = true;
         new Thread(() -> {
 
             CvSink cvSink = CameraServer.getInstance().getVideo(camera);

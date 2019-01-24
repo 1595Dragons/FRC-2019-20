@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -16,6 +17,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * <code>try{}catch{}</code> block.
  */
 public class TeleOp {
+
+    private XboxController driver;
 
     private RobotMap robot;
 
@@ -43,52 +46,58 @@ public class TeleOp {
         SmartDashboard.putNumber("kD", this.initialKD);
         tracking = new Tracking(kP, kI, kD);
         System.out.println("Cos of 90: " + Math.cos(90));
+        this.driver = this.robot.gamepad1;
     }
 
     /**
      * This is for code that we want to run <b>repeatidly</b>.
      */
-    public void periodic(Vision vision) {
+    public void periodic() {
 
         boolean visionTracking;
-        if (this.robot.isVisionSupported) {
+        if (this.robot.vision.isRunning) {
             visionTracking = SmartDashboard.getBoolean("Vision tracking", false);
         } else {
             visionTracking = false;
         }
 
-        // Toggle vision tracking
-        if (robot.gamepad1.getBumperPressed(Hand.kLeft) || robot.gamepad1.getBumperPressed(Hand.kRight)) {
-            SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
+        // Toggle vision tracking, but only if vision is running
+        if (this.robot.vision.isRunning) {
+            if (this.driver.getBumperPressed(Hand.kLeft) || this.driver.getBumperPressed(Hand.kRight)) {
+                SmartDashboard.putBoolean("Vision tracking", !SmartDashboard.getBoolean("Vision tracking", false));
+            }
         }
 
         // Determine the drive methods
-        if (visionTracking && this.robot.isVisionSupported) {
-            this.visionTrackDrive(vision);
+        if (visionTracking && this.robot.vision.isRunning) {
+            this.visionTrackDrive();
         } else {
             this.westCoastDrive();
-            this.robot.gamepad1.setRumble(RumbleType.kRightRumble, 0.0d);
-            this.robot.gamepad1.setRumble(RumbleType.kLeftRumble, 0.0d);
+            this.driver.setRumble(RumbleType.kRightRumble, 0.0d);
+            this.driver.setRumble(RumbleType.kLeftRumble, 0.0d);
         }
 
         // Hatch mechanism
-        if (this.robot.gamepad1.getTriggerAxis(Hand.kLeft) > 0.1d || this.robot.gamepad1.getAButtonPressed()) {
+        if (this.driver.getTriggerAxis(Hand.kLeft) > 0.1d) {
             this.robot.secureHatchPanel();
         }
-        if (this.robot.gamepad1.getTriggerAxis(Hand.kRight) > 0.1d || this.robot.gamepad1.getBButtonPressed()) {
+        if (this.driver.getTriggerAxis(Hand.kRight) > 0.1d) {
             this.robot.releaseHatchPanel();
+        }
+        if (this.driver.getAButtonPressed()) {
+            this.robot.toggleHatchMechanism();
         }
 
         // Get whether or not the robot can see the target
-        this.canSeeTarget = vision.numberOfTargets() != 0;
+        this.canSeeTarget = this.robot.vision.numberOfTargets() != 0;
         SmartDashboard.putBoolean("Can see vision stick", canSeeTarget);
 
-        if (this.robot.isVisionSupported) {
+        if (this.robot.vision.isRunning) {
             if (this.canSeeTarget) {
-                this.centerX = vision.findCenterX();
-                SmartDashboard.putNumber("Degrees", vision.getDegree(centerX));
-                SmartDashboard.putNumber("Width", vision.getTargetWidth());
-                SmartDashboard.putNumber("Distance", vision.getDistance(centerX));
+                this.centerX = this.robot.vision.findCenterX();
+                SmartDashboard.putNumber("Degrees", this.robot.vision.getDegree(centerX));
+                SmartDashboard.putNumber("Width", this.robot.vision.getTargetWidth());
+                SmartDashboard.putNumber("Distance", this.robot.vision.getDistance(centerX));
             }
         }
 
@@ -100,24 +109,24 @@ public class TeleOp {
     private void westCoastDrive() {
 
         // Calculate drive code, with turbo button
-        double forward = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getY(Hand.kLeft)
-                : robot.gamepad1.getY(Hand.kLeft) / 2, turn = robot.gamepad1.getStickButton(Hand.kLeft) ? robot.gamepad1.getX(Hand.kRight)
-                        : robot.gamepad1.getX(Hand.kRight) / 2;
+        double forward = this.driver.getStickButton(Hand.kLeft) ? this.driver.getY(Hand.kLeft)
+                : this.driver.getY(Hand.kLeft) / 2,
+                turn = this.driver.getStickButton(Hand.kLeft) ? this.driver.getX(Hand.kRight)
+                        : this.driver.getX(Hand.kRight) / 2;
 
-                        
         // Check if there should be turning percision
-        if (this.robot.gamepad1.getStickButton(Hand.kRight)) {
+        if (this.driver.getStickButton(Hand.kRight)) {
             turn /= 2;
         }
 
         // Check if tristan mode is enabled
         if (Robot.tristanMode) {
-            forward = forward / 5;
-            turn = turn / 5;
+            forward = forward / 4;
+            turn = turn / 4;
         }
 
         // Basic west coast drive code
-        if (Math.abs(forward) > 0.02d || Math.abs(turn) > 0.02d) {
+        if (Math.abs(forward) > 0.025d || Math.abs(turn) > 0.025d) {
             this.robot.leftDrive1.set(ControlMode.PercentOutput, forward - turn);
             this.robot.rightDrive1.set(ControlMode.PercentOutput, forward + turn);
         } else {
@@ -127,7 +136,7 @@ public class TeleOp {
 
     }
 
-    private void visionTrackDrive(Vision vision) {
+    private void visionTrackDrive() {
         try {
 
             double pidPower;
@@ -159,7 +168,7 @@ public class TeleOp {
                 }
 
                 if (Math.abs(this.centerX) > 2) {
-                    pidPower = tracking.trackTurnPower(vision.getDegree(this.centerX));
+                    pidPower = tracking.trackTurnPower(this.robot.vision.getDegree(this.centerX));
                 } else {
                     pidPower = 0;
                     tracking.pid.reset();

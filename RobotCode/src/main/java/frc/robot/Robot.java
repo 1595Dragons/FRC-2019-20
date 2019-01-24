@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -20,11 +18,7 @@ public class Robot extends TimedRobot {
 
 	private circlePath autonomous = new circlePath(this.robot);
 
-	private Vision vision = new Vision();
-
 	public static boolean tristanMode = false;
-
-	private UsbCamera visioncam;
 
 	/**
 	 * This function is run when the robot is first started up and should be used
@@ -32,29 +26,10 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-
-		
 		try {
 			// Set the endcoders to 0
 			robot.rightDrive1.setSelectedSensorPosition(0);
 			robot.leftDrive1.setSelectedSensorPosition(0);
-
-			SmartDashboard.putBoolean("Enable vision", true);
-
-
-			// Setup the camera used for vision
-
-		// http://roborio-1595-frc.local:1181/?action=stream
-		visioncam = CameraServer.getInstance().startAutomaticCapture(0);
-		// For now, just use basic vision for driving
-		visioncam.setFPS(15);
-		//visioncam.setBrightness(0);
-		//visioncam.setWhiteBalanceManual(10000);
-		visioncam.setResolution(320, 240);
-		//visioncam.setExposureManual(0);
-
-		// Setup the targeting vision system
-		vision.generateTargetImage(visioncam);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,12 +41,6 @@ public class Robot extends TimedRobot {
 			SmartDashboard.putNumber("Left position", robot.leftDrive1.getSelectedSensorPosition());
 			SmartDashboard.putNumber("Right position", robot.rightDrive1.getSelectedSensorPosition());
 
-			if (this.robot.isVisionSupported != SmartDashboard.getBoolean("Enable vision", true)) {
-				this.robot.isVisionSupported = SmartDashboard.getBoolean("Enable vision", true);
-				System.out.println("Updating vision support");
-			}
-
-			
 			// Check for tristan mode
 			if (this.robot.gamepad1.getStartButtonPressed()) {
 				Robot.tristanMode = !Robot.tristanMode;
@@ -141,7 +110,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		try {
-			teleOp.periodic(vision);
+			teleOp.periodic();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,7 +118,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testInit() {
-		
+
 	}
 
 	/**
