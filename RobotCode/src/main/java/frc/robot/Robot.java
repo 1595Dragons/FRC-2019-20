@@ -16,25 +16,89 @@ public class Robot extends TimedRobot {
 
 	private TeleOp teleOp = new TeleOp(this.robot);
 
-	private circlePath autonomous = new circlePath(this.robot);
-
 	public static boolean tristanMode = false;
 
+	public Robot() {
+	}
+
 	/**
-	 * This function is run when the robot is first started up and should be used
-	 * for any initialization code.
+	 * Robot-wide initialization code should go here.
+	 *
+	 * <p>
+	 * Users should override this method for default Robot-wide initialization which
+	 * will be called when the robot is first powered on. It will be called exactly
+	 * one time.
+	 *
+	 * <p>
+	 * Warning: the Driver Station "Robot Code" light and FMS "Robot Ready"
+	 * indicators will be off until RobotInit() exits. Code in RobotInit() that
+	 * waits for enable will cause the robot to never indicate that the code is
+	 * ready, causing the robot to be bypassed in a match.
 	 */
 	@Override
 	public void robotInit() {
 		try {
 			// Set the endcoders to 0
-			robot.rightDrive1.setSelectedSensorPosition(0);
-			robot.leftDrive1.setSelectedSensorPosition(0);
+			this.robot.rightDrive1.setSelectedSensorPosition(0);
+			this.robot.leftDrive1.setSelectedSensorPosition(0);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Initialization code for disabled mode should go here.
+	 *
+	 * <p>
+	 * Users should override this method for initialization code which will be
+	 * called each time the robot enters disabled mode.
+	 */
+	@Override
+	public void disabledInit() {
+	}
+
+	/**
+	 * Initialization code for autonomous mode should go here.
+	 *
+	 * <p>
+	 * Users should override this method for initialization code which will be
+	 * called each time the robot enters autonomous mode.
+	 */
+	@Override
+	public void autonomousInit() {
+	}
+
+	/**
+	 * Initialization code for teleop mode should go here.
+	 *
+	 * <p>
+	 * Users should override this method for initialization code which will be
+	 * called each time the robot enters teleop mode.
+	 */
+	@Override
+	public void teleopInit() {
+		try {
+			teleOp.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Initialization code for test mode should go here.
+	 *
+	 * <p>
+	 * Users should override this method for initialization code which will be
+	 * called each time the robot enters test mode.
+	 */
+	@Override
+	public void testInit() {
+	}
+
+	/**
+	 * Periodic code for all robot modes should go here.
+	 */
 	@Override
 	public void robotPeriodic() {
 		try {
@@ -51,62 +115,23 @@ public class Robot extends TimedRobot {
 	}
 
 	/**
-	 * This function is called once each time the robot enters Disabled mode. You
-	 * can use it to reset any subsystem information you want to clear when the
-	 * robot is disabled.
+	 * Periodic code for disabled mode should go here.
 	 */
-	@Override
-	public void disabledInit() {
-
-	}
-
 	@Override
 	public void disabledPeriodic() {
-
+		// This function is me.
 	}
 
 	/**
-	 * This autonomous (along with the chooser code above) shows how to select
-	 * between different autonomous modes using the dashboard. The sendable chooser
-	 * code works with the Java SmartDashboard. If you prefer the LabVIEW Dashboard,
-	 * remove all of the chooser code and uncomment the getString code to get the
-	 * auto name from the text box below the Gyro
-	 *
-	 * <p>
-	 * You can add additional auto modes by adding additional commands to the
-	 * chooser code above (like the commented example) or additional comparisons to
-	 * the switch structure below with additional strings & commands.
-	 */
-	@Override
-	public void autonomousInit() {
-		try {
-			autonomous.init();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * This function is called periodically during autonomous.
+	 * Periodic code for autonomous mode should go here.
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		try {
-			autonomous.periodic();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
-	@Override
-	public void teleopInit() {
-		try {
-			teleOp.init();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	/**
+   * Periodic code for teleop mode should go here.
+   */
 	@Override
 	public void teleopPeriodic() {
 		try {
@@ -116,14 +141,9 @@ public class Robot extends TimedRobot {
 		}
 	}
 
-	@Override
-	public void testInit() {
-
-	}
-
 	/**
-	 * This function is called periodically during test mode.
-	 */
+   * Periodic code for test mode should go here.
+   */
 	@Override
 	public void testPeriodic() {
 
