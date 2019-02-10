@@ -16,10 +16,9 @@ public class Robot extends TimedRobot {
 
 	private TeleOp teleOp = new TeleOp(this.robot);
 
-	public static boolean tristanMode = false;
-
 	/**
-	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the watch dog...
+	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
+	 * watch dog...
 	 * 
 	 * Man that sounds bad :(
 	 */
@@ -43,14 +42,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-		try {
-			// Set the endcoders to 0
-			this.robot.rightDrive1.setSelectedSensorPosition(0);
-			this.robot.leftDrive1.setSelectedSensorPosition(0);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -108,13 +100,11 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		try {
-			SmartDashboard.putNumber("Left position", robot.leftDrive1.getSelectedSensorPosition());
-			SmartDashboard.putNumber("Right position", robot.rightDrive1.getSelectedSensorPosition());
+			SmartDashboard.putNumber("Left position", this.robot.leftDrive.getPosition());
+			SmartDashboard.putNumber("Right position", this.robot.rightDrive.getPosition());
 
-			// Check for tristan mode
-			if (this.robot.gamepad1.getStartButtonPressed()) {
-				Robot.tristanMode = !Robot.tristanMode;
-			}
+			SmartDashboard.putNumber("Left power", this.robot.leftDrive.getMotorOutputPercent());
+			SmartDashboard.putNumber("Rigth power", this.robot.rightDrive.getMotorOutputPercent());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -136,8 +126,8 @@ public class Robot extends TimedRobot {
 	}
 
 	/**
-   * Periodic code for teleop mode should go here.
-   */
+	 * Periodic code for teleop mode should go here.
+	 */
 	@Override
 	public void teleopPeriodic() {
 		try {
@@ -148,8 +138,8 @@ public class Robot extends TimedRobot {
 	}
 
 	/**
-   * Periodic code for test mode should go here.
-   */
+	 * Periodic code for test mode should go here.
+	 */
 	@Override
 	public void testPeriodic() {
 
