@@ -7,7 +7,11 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
@@ -15,6 +19,8 @@ public class Robot extends TimedRobot {
 	private RobotMap robot = new RobotMap();
 
 	private TeleOp teleOp = new TeleOp(this.robot);
+
+	private SendableChooser<Motor> chooser = new SendableChooser<>();
 
 	/**
 	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
@@ -42,6 +48,14 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
+		this.chooser.setDefaultOption("Right 1", this.robot.rightDrive);
+		this.chooser.addOption("Right 2", this.robot.rightDrive2);
+		this.chooser.addOption("Right 3", this.robot.rightDrive3);
+		this.chooser.addOption("Left 1", this.robot.leftDrive);
+		this.chooser.addOption("Left 2", this.robot.leftDrive2);
+		this.chooser.addOption("Left 3", this.robot.leftDrive3);
+
+		SmartDashboard.putData(this.chooser);
 
 	}
 
@@ -142,7 +156,13 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void testPeriodic() {
-
+		try {
+			this.chooser.getSelected().set(ControlMode.PercentOutput, this.robot.gamepad1.getX(Hand.kLeft));
+		} catch (NullPointerException e) {
+			// Ignore
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 	}
 
 }

@@ -34,7 +34,7 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that)
 	 */
 	public Motor leftDrive, rightDrive;
-	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
+	public Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
 
 	/**
 	 * Setup the controllers for the drivers. No need to wait for the constructor on
@@ -70,14 +70,14 @@ public class RobotMap {
 		this.rightDrive3 = new Motor(this.rightDrive3Port);
 
 		// Setup encoders
-		this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		//this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		//this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		// Set the secondary motors to follow the first ones
-		this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
-		this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
-		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
-		this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
+		//this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
+		//this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
+		//this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
+		//this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
 
 		// Invert necessary drive motors
 		// TODO
