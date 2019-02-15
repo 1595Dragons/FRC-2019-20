@@ -9,7 +9,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
  * All the standard talonSRX methods still apply and work, its just that there
  * are a few more to choose form now.
  * 
- * @author Spud.
+ * @author Stephen - FRC 1595
  */
 public class Motor extends com.ctre.phoenix.motorcontrol.can.TalonSRX {
 
@@ -35,26 +35,43 @@ public class Motor extends com.ctre.phoenix.motorcontrol.can.TalonSRX {
     }
 
     /**
-     * TODO
+     * Set the P value for the motors PID.
      * 
-     * @param p
+     * @param p The P value.
      */
     public void setP(double p) {
         this.pid.setP(p);
     }
 
     /**
-     * TODO
+     * Set the I value for the motors PID.
+     * 
+     * @param i The I value.
      */
     public void setI(double i) {
         this.pid.setI(i);
     }
 
     /**
+     * Set the D value for the motors PID.
      * 
+     * @param d The D value.
      */
     public void setD(double d) {
         this.pid.setD(d);
+    }
+
+    /**
+     * Sets the PID values for the motor.
+     * 
+     * @param p The P value.
+     * @param i The I value.
+     * @param d The D value.
+     */
+    public void setPID(double p, double i, double d) {
+        this.setP(p);
+        this.setI(i);
+        this.setD(d);
     }
 
     /**
@@ -72,7 +89,7 @@ public class Motor extends com.ctre.phoenix.motorcontrol.can.TalonSRX {
     }
 
     /**
-     * TODO
+     * This will attempt to drive to a provided encoder position using a PID.
      */
     public void driveToPosition(double position) {
         double power = this.pid.getOutput(this.getPosition(), position);

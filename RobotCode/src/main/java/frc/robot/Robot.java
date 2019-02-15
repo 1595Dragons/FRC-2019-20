@@ -7,20 +7,12 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Robot extends TimedRobot {
+public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	private RobotMap robot = new RobotMap();
-
-	private TeleOp teleOp = new TeleOp(this.robot);
-
-	private SendableChooser<Motor> chooser = new SendableChooser<>();
 
 	/**
 	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
@@ -48,14 +40,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-		this.chooser.setDefaultOption("Right 1", this.robot.rightDrive);
-		this.chooser.addOption("Right 2", this.robot.rightDrive2);
-		this.chooser.addOption("Right 3", this.robot.rightDrive3);
-		this.chooser.addOption("Left 1", this.robot.leftDrive);
-		this.chooser.addOption("Left 2", this.robot.leftDrive2);
-		this.chooser.addOption("Left 3", this.robot.leftDrive3);
-
-		SmartDashboard.putData(this.chooser);
+		this.robot.setupTestMode();
 
 	}
 
@@ -90,11 +75,6 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		try {
-			teleOp.init();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -145,7 +125,28 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		try {
-			teleOp.periodic();
+			// Calculate drive power
+			double forward = this.robot.driver.getY(Hand.kLeft), turn = this.robot.driver.getX(Hand.kRight);
+
+			// Basic west coast drive code
+			if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
+				this.robot.leftDrive.setPower(forward - turn);
+				this.robot.rightDrive.setPower(forward + turn);
+			} else {
+				this.robot.leftDrive.stop();
+				this.robot.rightDrive.stop();
+			}
+
+			// Hatch mechanism
+			if (this.robot.driver.getTriggerAxis(Hand.kLeft) > 0.1d) {
+				this.robot.secureHatchPanel();
+			}
+			if (this.robot.driver.getTriggerAxis(Hand.kRight) > 0.1d) {
+				this.robot.releaseHatchPanel();
+			}
+			if (this.robot.driver.getAButtonPressed()) {
+				this.robot.toggleHatchMechanism();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -157,11 +158,9 @@ public class Robot extends TimedRobot {
 	@Override
 	public void testPeriodic() {
 		try {
-			this.chooser.getSelected().set(ControlMode.PercentOutput, this.robot.gamepad1.getX(Hand.kLeft));
-		} catch (NullPointerException e) {
-			// Ignore
-		} catch (Exception e1) {
-			e1.printStackTrace();
+			this.robot.testMotors();
+		} catch (Exception error) {
+			error.printStackTrace();
 		}
 	}
 

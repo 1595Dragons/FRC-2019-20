@@ -1,46 +1,48 @@
 package frc.robot;
-/*----------------------------------------------------------------------------*/
-
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
  * to a variable name. This provides flexibility changing wiring, makes checking
  * the wiring easier and significantly reduces the number of magic numbers
  * floating around.
+ * 
+ * @author Stephen - FRC 1595
  */
 public class RobotMap {
 
 	/**
-	 * Get the port mappings for the robot
-	 * TODO
+	 * Get the port mappings for the robot.<br >
+	 * <br >
+	 * Use the phoenix tuner to find these values.
 	 */
-	private final int leftDrive1Port = 0, leftDrive2Port = 1, leftDrive3Port = 2, rightDrive1Port = 3, rightDrive2Port = 4, rightDrive3Port = 5;
+	private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0, rightDrive1Port = 14,
+			rightDrive2Port = 12, rightDrive3Port = 2;
 
 	/**
-	 * Decalre the motrors used on the robot, but dont initalize them yet.
+	 * Declare the motors that will be used on the robot and will be used by other
+	 * classes. Don't initalize them yet.
 	 * 
-	 * (Wait untill the constructor to do that)
+	 * (Wait untill the constructor to do that).
+	 * 
 	 */
 	public Motor leftDrive, rightDrive;
-	public Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
 
 	/**
-	 * Setup the controllers for the drivers. No need to wait for the constructor on
-	 * this one.
+	 * Declare the motors that will be used on the robot, but that shouldnt be used
+	 * by other classes. This is most commonly the slave motors used on the drive
+	 * train.
 	 */
-	public XboxController gamepad1 = new XboxController(0), gamepad2 = new XboxController(1);
+	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
+
+	/**
+	 * Setup the controllers for the drivers.
+	 */
+	public final XboxController driver = new XboxController(0), operator = new XboxController(1);
 
 	/**
 	 * Create the object for the driver camera, as well as the vision camera (if one
@@ -49,9 +51,20 @@ public class RobotMap {
 	 * Also, the stream produced by the camera can be viewed at:
 	 * {@link https://roborio-1595-frc.local:1181/?action=stream}
 	 */
-	public UsbCamera driverCam;
+	public edu.wpi.cscore.UsbCamera driverCam;
 
+	/**
+	 * Declare a private global boolean for the hatch panel mechanism functions.
+	 */
 	private boolean hatchPanelSecured = false;
+
+	/**
+	 * Declare a chooser (radio buttons on SmartDashboard) that will be used for
+	 * test mode. The reason why this takes a <code>Motor</code> object is becasue
+	 * the object the chooser will return is the individual motor to be run during
+	 * test mode.
+	 */
+	private SendableChooser<Motor> chooser = new SendableChooser<>();
 
 	/**
 	 * Setup everything on the robot.
@@ -70,24 +83,26 @@ public class RobotMap {
 		this.rightDrive3 = new Motor(this.rightDrive3Port);
 
 		// Setup encoders
-		//this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		//this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		// Set the secondary motors to follow the first ones
-		//this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
-		//this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
-		//this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
-		//this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
+		this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
+		this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
+		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
+		this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
 
 		// Invert necessary drive motors
-		// TODO
+		this.leftDrive.setInverted(true);
+		this.leftDrive2.setInverted(true);
+		this.leftDrive3.setInverted(true);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
 		try {
-			this.driverCam = CameraServer.getInstance().startAutomaticCapture(0);
-			this.driverCam.setFPS(15);
-			this.driverCam.setResolution(320, 240);
+			// this.driverCam = CameraServer.getInstance().startAutomaticCapture(0);
+			// this.driverCam.setFPS(15);
+			// this.driverCam.setResolution(320, 240);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -97,7 +112,7 @@ public class RobotMap {
 	 * Releases the hatch panel. (Opens the hatch mechanism).
 	 */
 	public void releaseHatchPanel() {
-		// TODO
+		// TODO add solenoids
 		this.hatchPanelSecured = true;
 	}
 
@@ -105,7 +120,7 @@ public class RobotMap {
 	 * Secures the hatch panel. (Closes the hatch mechanism).
 	 */
 	public void secureHatchPanel() {
-		// TODO
+		// TODO add solenoids
 		this.hatchPanelSecured = true;
 	}
 
@@ -120,4 +135,42 @@ public class RobotMap {
 			this.secureHatchPanel();
 		}
 	}
+
+	/**
+	 * This sets up the sendable chooser and its motors on the smart dashbaord for
+	 * use in the test mode.
+	 */
+	public void setupTestMode() {
+		// This is for running the motors one at a time during test mode
+		this.chooser.setDefaultOption("Right 1", this.rightDrive);
+		this.chooser.addOption("Right 2", this.rightDrive2);
+		this.chooser.addOption("Right 3", this.rightDrive3);
+		this.chooser.addOption("Left 1", this.leftDrive);
+		this.chooser.addOption("Left 2", this.leftDrive2);
+		this.chooser.addOption("Left 3", this.leftDrive3);
+
+		// Add the chooser to smart dashboard
+		edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putData(this.chooser);
+	}
+
+	/**
+	 * When run, this will get the chosen motor from the chooser, and apply the
+	 * necessary power to it. This is useful for testing individual motors, in order
+	 * to check for things such as whether they are grinding against each other.
+	 * <br >
+	 * <br >
+	 * Another way to check if the motors are grinding against each other is by
+	 * checking the lights on the individual talons. If the light is green its going
+	 * 'forward', if it's red it's going in 'reverse', and if it's orange its not
+	 * moving.
+	 */
+	public void testMotors() {
+		double power = this.driver.getY(edu.wpi.first.wpilibj.GenericHID.Hand.kLeft);
+		if (Math.abs(power) > 0.1d) {
+			this.chooser.getSelected().setPower(power);
+		} else {
+			this.chooser.getSelected().stop();
+		}
+	}
+
 }
