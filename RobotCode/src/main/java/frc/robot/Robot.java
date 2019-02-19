@@ -149,11 +149,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			this.robot.wrist.setPower(wristPower);
 
 			// Hatch mechanism
-			if (this.robot.driver.getTriggerAxis(Hand.kLeft) > 0.1d) {
-				this.robot.secureHatchPanel();
+			if (this.robot.driver.getBumper(Hand.kLeft)) {
+				this.robot.extendHatch();
 			}
-			if (this.robot.driver.getTriggerAxis(Hand.kRight) > 0.1d) {
-				this.robot.releaseHatchPanel();
+			if (this.robot.driver.getBumper(Hand.kRight)) {
+				this.robot.retracthHatch();
 			}
 			if (this.robot.driver.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();

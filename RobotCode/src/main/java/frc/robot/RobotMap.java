@@ -3,8 +3,10 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -35,7 +37,7 @@ public class RobotMap {
 			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 
 	// Get the Solenoid ports off of the PCM
-	private final int popperPort = -1, extenderPort = -1, clamperPort = -1; // TODO: Find correct ports
+	private final int popperPort1 = 0, popperPort2 = 1, extenderPort1 = 2, extenderPort2 = 3, clamperPort1 = 4, clamperPort2 = 5; // TODO: Find correct ports
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
@@ -50,7 +52,7 @@ public class RobotMap {
 	 * in order to encourage the use of the functions in this class. Also dont
 	 * initalize them.
 	 */
-	private Solenoid popper, extender, clamper;
+	private DoubleSolenoid popper, extender, clamper;
 
 	/**
 	 * Declare the motors that will be used on the robot, but that shouldnt be used
@@ -107,12 +109,12 @@ public class RobotMap {
 		this.rightIntake = new Motor(this.rightIntakePort);
 
 		// Setup the encoders
-		this.popper = new Solenoid(popperPort);
-		this.popper.setPulseDuration(0.02d);
-		this.extender = new Solenoid(extenderPort);
-		this.extender.setPulseDuration(0.02d);
-		this.clamper = new Solenoid(clamperPort);
-		this.clamper.setPulseDuration(0.02d);
+		this.popper = new DoubleSolenoid(popperPort1, popperPort2);
+		//this.popper.setPulseDuration(0.02d);
+		this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
+		//this.extender.setPulseDuration(0.02d);
+		this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
+		//this.clamper.setPulseDuration(0.02d);
 
 		// Setup encoders
 		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -150,7 +152,7 @@ public class RobotMap {
 	 * Releases the hatch panel. (Opens the hatch mechanism).
 	 */
 	public void releaseHatchPanel() {
-		this.clamper.set(false);
+		this.clamper.set(Value.kReverse);
 		this.hatchPanelSecured = false;
 	}
 
@@ -158,7 +160,7 @@ public class RobotMap {
 	 * Secures the hatch panel. (Closes the hatch mechanism).
 	 */
 	public void secureHatchPanel() {
-		this.clamper.set(true);
+		this.clamper.set(Value.kForward);
 		this.hatchPanelSecured = true;
 	}
 
@@ -166,7 +168,7 @@ public class RobotMap {
 	 * Deploys the hatch mech.
 	 */
 	public void extendHatch() {
-		this.extender.set(true);
+		this.extender.set(Value.kForward);
 		this.hatchMechDeployed = true;
 	}
 
@@ -174,7 +176,7 @@ public class RobotMap {
 	 * Retracts the hatch mech.
 	 */
 	public void retracthHatch() {
-		this.extender.set(false);
+		this.extender.set(Value.kReverse);
 		this.hatchMechDeployed = false;
 	}
 
@@ -182,7 +184,7 @@ public class RobotMap {
 	 * Pops the ball.
 	 */
 	public void pop() {
-		this.popper.set(true);
+		this.popper.set(Value.kForward);
 		this.popped = true;
 	}
 
@@ -190,7 +192,7 @@ public class RobotMap {
 	 * Petracts the popper.
 	 */
 	public void dePop() {
-		this.popper.set(false);
+		this.popper.set(Value.kReverse);
 		this.popped = false;
 	}
 
