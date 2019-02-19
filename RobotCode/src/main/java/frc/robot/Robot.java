@@ -41,7 +41,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	@Override
 	public void robotInit() {
 		this.robot.setupTestMode();
-
 	}
 
 	/**
@@ -75,6 +74,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
+		//Limits for the wrist
+		this.robot.wrist.configForwardSoftLimitThreshold(-3797);
+		this.robot.wrist.configReverseSoftLimitThreshold(-4797);
+		this.robot.wrist.configForwardSoftLimitEnable(true);
+		this.robot.wrist.configReverseSoftLimitEnable(true);
 	}
 
 	/**
@@ -129,13 +133,20 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			double forward = this.robot.driver.getY(Hand.kLeft), turn = this.robot.driver.getX(Hand.kRight);
 
 			// Basic west coast drive code
-			if (Math.abs(forward) > 0.05d || Math.abs(turn) > 0.05d) {
-				this.robot.leftDrive.setPower(forward - turn);
-				this.robot.rightDrive.setPower(forward + turn);
+			if (Math.abs(forward) > 0.1d || Math.abs(turn) > 0.1d) {
+				this.robot.leftDrive.setPower(Math.pow((forward - turn), 3) * .5);
+				this.robot.rightDrive.setPower(Math.pow((forward + turn), 3) * .5);
 			} else {
 				this.robot.leftDrive.stop();
 				this.robot.rightDrive.stop();
 			}
+
+			//Intake
+			this.robot.leftIntake.setPower((this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight)));
+
+			//Wrist
+			double wristPower = this.robot.operator.getY(Hand.kLeft) * .5;
+			this.robot.wrist.setPower(wristPower);
 
 			// Hatch mechanism
 			if (this.robot.driver.getTriggerAxis(Hand.kLeft) > 0.1d) {
@@ -147,6 +158,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.driver.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
 			}
+			SmartDashboard.putNumber("Wrist Position", this.robot.wrist.getSelectedSensorPosition());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -20,8 +21,14 @@ public class RobotMap {
 	 * <br >
 	 * Use the phoenix tuner to find these values.
 	 */
-	private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0, rightDrive1Port = 14,
-			rightDrive2Port = 12, rightDrive3Port = 2;
+
+	//Practice Bot? - to do... double check
+	/*private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0, rightDrive1Port = 14,
+			rightDrive2Port = 12, rightDrive3Port = 2;*/
+
+	//Real Robot
+	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
+		rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
@@ -30,7 +37,7 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
-	public Motor leftDrive, rightDrive;
+	public Motor leftDrive, rightDrive, wrist, leftIntake, rightIntake;
 
 	/**
 	 * Declare the motors that will be used on the robot, but that shouldnt be used
@@ -81,21 +88,30 @@ public class RobotMap {
 		this.rightDrive = new Motor(this.rightDrive1Port);
 		this.rightDrive2 = new Motor(this.rightDrive2Port);
 		this.rightDrive3 = new Motor(this.rightDrive3Port);
+		this.wrist = new Motor(this.wristPort);
+		this.leftIntake = new Motor(this.leftIntakePort);
+		this.rightIntake = new Motor(this.rightIntakePort);
 
 		// Setup encoders
-		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		 //this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		 //this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		// Set the secondary motors to follow the first ones
 		this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
 		this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
 		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
 		this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
+		this.rightIntake.set(ControlMode.Follower, this.leftIntakePort);
 
 		// Invert necessary drive motors
 		this.leftDrive.setInverted(true);
 		this.leftDrive2.setInverted(true);
 		this.leftDrive3.setInverted(true);
+		this.rightIntake.setInverted(true);
+		
+		//State whether the sensor is in phase with the motor
+		this.wrist.setSensorPhase(true);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
