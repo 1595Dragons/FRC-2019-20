@@ -3,8 +3,10 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
@@ -30,14 +32,16 @@ public class RobotMap {
 	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
 		rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 
+	private final int popperPort = -1, extenderPort = -1, clamperPort = -1;
 	/**
-	 * Declare the motors that will be used on the robot and will be used by other
+	 * Declare the motors & solenoids that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
 	 * 
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
 	public Motor leftDrive, rightDrive, wrist, leftIntake, rightIntake;
+	public Solenoid popper, extender, clamper;
 
 	/**
 	 * Declare the motors that will be used on the robot, but that shouldnt be used
@@ -64,6 +68,8 @@ public class RobotMap {
 	 * Declare a private global boolean for the hatch panel mechanism functions.
 	 */
 	private boolean hatchPanelSecured = false;
+	private boolean hatchMechDeployed = false;
+	private boolean popped = false;
 
 	/**
 	 * Declare a chooser (radio buttons on SmartDashboard) that will be used for
@@ -80,7 +86,7 @@ public class RobotMap {
 	 * during <code>robotInit()</code>).
 	 */
 	RobotMap() {
-
+		SmartDashboard.putNumber("D-pad", driver.getPOV());
 		// Apply port addresses to the robot
 		this.leftDrive = new Motor(this.leftDrive1Port);
 		this.leftDrive2 = new Motor(this.leftDrive2Port);
@@ -91,6 +97,10 @@ public class RobotMap {
 		this.wrist = new Motor(this.wristPort);
 		this.leftIntake = new Motor(this.leftIntakePort);
 		this.rightIntake = new Motor(this.rightIntakePort);
+
+		this.popper = new Solenoid(popperPort);
+		this.extender = new Solenoid(extenderPort);
+		this.clamper = new Solenoid(clamperPort);
 
 		// Setup encoders
 		 //this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -128,16 +138,47 @@ public class RobotMap {
 	 * Releases the hatch panel. (Opens the hatch mechanism).
 	 */
 	public void releaseHatchPanel() {
-		// TODO add solenoids
-		this.hatchPanelSecured = true;
+		this.clamper.set(false);
+		this.hatchPanelSecured = false;
 	}
 
 	/**
 	 * Secures the hatch panel. (Closes the hatch mechanism).
 	 */
 	public void secureHatchPanel() {
-		// TODO add solenoids
+		this.clamper.set(true);
 		this.hatchPanelSecured = true;
+	}
+
+	/**
+	 * Deploys the hatch mech.
+	 */
+	public void extendHatch() {
+		this.extender.set(true);
+		this.hatchMechDeployed = true;
+	}
+
+	/**
+	 * retracts the hatch mech.
+	 */
+	public void retracthHtch() {
+		this.extender.set(false);
+		this.hatchMechDeployed = false;
+	}
+	/**
+	 * Pops the ball
+	 */
+	public void pop(){
+		this.popper.set(true);
+		this.popped = true;
+	}
+
+	/**
+	 * retracts the popper.
+	 */
+	public void dePop(){
+		this.popper.set(false);
+		this.popped = false;
 	}
 
 	/**
