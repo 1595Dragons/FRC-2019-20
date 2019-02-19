@@ -24,24 +24,33 @@ public class RobotMap {
 	 * Use the phoenix tuner to find these values.
 	 */
 
-	//Practice Bot? - to do... double check
-	/*private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0, rightDrive1Port = 14,
-			rightDrive2Port = 12, rightDrive3Port = 2;*/
+	// Practice Bot? - TODO: double check
+	/*
+	 * private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0,
+	 * rightDrive1Port = 14, rightDrive2Port = 12, rightDrive3Port = 2;
+	 */
 
-	//Real Robot
+	// Real Robot
 	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
-		rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
+			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 
-	private final int popperPort = -1, extenderPort = -1, clamperPort = -1;
+	// Get the Solenoid ports off of the PCM
+	private final int popperPort = -1, extenderPort = -1, clamperPort = -1; // TODO: Find correct ports
 	/**
-	 * Declare the motors & solenoids that will be used on the robot and will be used by other
+	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
 	 * 
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
 	public Motor leftDrive, rightDrive, wrist, leftIntake, rightIntake;
-	public Solenoid popper, extender, clamper;
+
+	/**
+	 * Declare the solenoids that will be used in the robot, but keep them private,
+	 * in order to encourage the use of the functions in this class. Also dont
+	 * initalize them.
+	 */
+	private Solenoid popper, extender, clamper;
 
 	/**
 	 * Declare the motors that will be used on the robot, but that shouldnt be used
@@ -67,9 +76,7 @@ public class RobotMap {
 	/**
 	 * Declare a private global boolean for the hatch panel mechanism functions.
 	 */
-	private boolean hatchPanelSecured = false;
-	private boolean hatchMechDeployed = false;
-	private boolean popped = false;
+	private boolean hatchPanelSecured = false, hatchMechDeployed = false, popped = false;
 
 	/**
 	 * Declare a chooser (radio buttons on SmartDashboard) that will be used for
@@ -87,6 +94,7 @@ public class RobotMap {
 	 */
 	RobotMap() {
 		SmartDashboard.putNumber("D-pad", driver.getPOV());
+
 		// Apply port addresses to the robot
 		this.leftDrive = new Motor(this.leftDrive1Port);
 		this.leftDrive2 = new Motor(this.leftDrive2Port);
@@ -98,13 +106,17 @@ public class RobotMap {
 		this.leftIntake = new Motor(this.leftIntakePort);
 		this.rightIntake = new Motor(this.rightIntakePort);
 
+		// Setup the encoders
 		this.popper = new Solenoid(popperPort);
+		this.popper.setPulseDuration(0.02d);
 		this.extender = new Solenoid(extenderPort);
+		this.extender.setPulseDuration(0.02d);
 		this.clamper = new Solenoid(clamperPort);
+		this.clamper.setPulseDuration(0.02d);
 
 		// Setup encoders
-		 //this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		 //this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		// Set the secondary motors to follow the first ones
@@ -119,8 +131,8 @@ public class RobotMap {
 		this.leftDrive2.setInverted(true);
 		this.leftDrive3.setInverted(true);
 		this.rightIntake.setInverted(true);
-		
-		//State whether the sensor is in phase with the motor
+
+		// State whether the sensor is in phase with the motor
 		this.wrist.setSensorPhase(true);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
@@ -159,24 +171,25 @@ public class RobotMap {
 	}
 
 	/**
-	 * retracts the hatch mech.
+	 * Retracts the hatch mech.
 	 */
-	public void retracthHtch() {
+	public void retracthHatch() {
 		this.extender.set(false);
 		this.hatchMechDeployed = false;
 	}
+
 	/**
-	 * Pops the ball
+	 * Pops the ball.
 	 */
-	public void pop(){
+	public void pop() {
 		this.popper.set(true);
 		this.popped = true;
 	}
 
 	/**
-	 * retracts the popper.
+	 * Petracts the popper.
 	 */
-	public void dePop(){
+	public void dePop() {
 		this.popper.set(false);
 		this.popped = false;
 	}
@@ -190,6 +203,28 @@ public class RobotMap {
 			this.releaseHatchPanel();
 		} else {
 			this.secureHatchPanel();
+		}
+	}
+
+	/**
+	 * Toggles the hatch extension mechanism.
+	 */
+	public void toggleHatchExtension() {
+		if (this.hatchMechDeployed) {
+			this.retracthHatch();
+		} else {
+			this.extendHatch();
+		}
+	}
+
+	/**
+	 * Toggles the ball popper doo-dad.
+	 */
+	public void togglePopper() {
+		if (this.popped) {
+			this.dePop();
+		} else {
+			this.pop();
 		}
 	}
 

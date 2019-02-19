@@ -158,7 +158,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.driver.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
 			}
-			SmartDashboard.putNumber("Wrist Position", this.robot.wrist.getSelectedSensorPosition());
+
+			// Display the wrist position
+			SmartDashboard.putNumber("Wrist Position", this.robot.wrist.getPosition());
 
 		} catch (Exception e) {
 			e.printStackTrace();
