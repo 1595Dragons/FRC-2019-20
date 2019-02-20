@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -37,7 +38,7 @@ public class RobotMap {
 			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 
 	// Get the Solenoid ports off of the PCM
-	private final int popperPort1 = 0, popperPort2 = 1, extenderPort1 = 2, extenderPort2 = 3, clamperPort1 = 4, clamperPort2 = 5; // TODO: Find correct ports
+	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7; // TODO: Find correct ports
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
@@ -95,7 +96,7 @@ public class RobotMap {
 	 * during <code>robotInit()</code>).
 	 */
 	RobotMap() {
-		SmartDashboard.putNumber("D-pad", driver.getPOV());
+		SmartDashboard.putNumber("Driver RX", this.driver.getY(Hand.kRight));
 
 		// Apply port addresses to the robot
 		this.leftDrive = new Motor(this.leftDrive1Port);

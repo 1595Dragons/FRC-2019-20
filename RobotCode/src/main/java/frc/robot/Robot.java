@@ -74,9 +74,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		//Limits for the wrist
-		this.robot.wrist.configForwardSoftLimitThreshold(-3797);
-		this.robot.wrist.configReverseSoftLimitThreshold(-4797);
+		// Limits for the wrist
+		int straightUp = -137;
+		this.robot.wrist.configForwardSoftLimitThreshold(straightUp + 2048 / 2);
+		this.robot.wrist.configReverseSoftLimitThreshold(straightUp - 2048 / 2);
 		this.robot.wrist.configForwardSoftLimitEnable(true);
 		this.robot.wrist.configReverseSoftLimitEnable(true);
 	}
@@ -130,33 +131,51 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void teleopPeriodic() {
 		try {
 			// Calculate drive power
-			double forward = this.robot.driver.getY(Hand.kLeft), turn = this.robot.driver.getX(Hand.kRight);
 
+			double forward = this.robot.driver.getY(Hand.kLeft), turn = this.robot.driver.getX(Hand.kRight)
+					+ this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
+			if (Math.abs(forward) < 0.2d) {
+				forward = 0;
+			}
+			if (Math.abs(turn) < 0.2d) {
+				turn = this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
+			}
 			// Basic west coast drive code
-			if (Math.abs(forward) > 0.1d || Math.abs(turn) > 0.1d) {
-				this.robot.leftDrive.setPower(Math.pow((forward - turn), 3) * .5);
-				this.robot.rightDrive.setPower(Math.pow((forward + turn), 3) * .5);
+			if (!this.robot.driver.getStickButton(Hand.kLeft)) {
+				this.robot.leftDrive.setPower((forward - turn) * .5);
+				this.robot.rightDrive.setPower((forward + turn) * .5);
 			} else {
+				this.robot.leftDrive.setPower((forward - turn));
+				this.robot.rightDrive.setPower((forward + turn));
+			}
+			if (forward == 0 && turn == 0) {
 				this.robot.leftDrive.stop();
 				this.robot.rightDrive.stop();
 			}
 
-			//Intake
-			this.robot.leftIntake.setPower((this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight)));
+			// Intake
+			this.robot.leftIntake.setPower(
+					(this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight)));
 
-			//Wrist
-			double wristPower = this.robot.operator.getY(Hand.kLeft) * .5;
+			// Wrist
+			double wristPower = this.robot.operator.getY(Hand.kLeft);
 			this.robot.wrist.setPower(wristPower);
 
 			// Hatch mechanism
-			if (this.robot.driver.getBumper(Hand.kLeft)) {
+			if (this.robot.operator.getBumper(Hand.kLeft)) {
 				this.robot.extendHatch();
 			}
-			if (this.robot.driver.getBumper(Hand.kRight)) {
+			if (this.robot.operator.getBumper(Hand.kRight)) {
 				this.robot.retracthHatch();
 			}
-			if (this.robot.driver.getAButtonPressed()) {
+			if (this.robot.operator.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
+			}
+			if (this.robot.operator.getBButtonPressed()) {
+				this.robot.togglePopper();
+			}
+			if (this.robot.operator.getXButton()) {
+				this.robot.toggleHatchExtension();
 			}
 
 			// Display the wrist position
