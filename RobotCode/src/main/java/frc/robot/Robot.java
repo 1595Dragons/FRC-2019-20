@@ -213,6 +213,19 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		}
 	}
 
+	public double clampMinus180To180(double theta){
+		double a = 0;
+		while(a > 180 || a < -180){
+			if(a > 180){
+				a -= 360;
+			}
+			else if(a < -180){
+				a -= 360;
+			}
+		}
+		return a;
+	}
+
 	/**
 	 * Periodic code for test mode should go here.
 	 */
