@@ -27,13 +27,11 @@ public class RobotMap {
 	 * Use the phoenix tuner to find these values.
 	 */
 
-	// Practice Bot? - TODO: double check
-	/*
-	 * private final int leftDrive1Port = 9, leftDrive2Port = 7, leftDrive3Port = 0,
-	 * rightDrive1Port = 14, rightDrive2Port = 12, rightDrive3Port = 2;
-	 */
-
 	// Real Robot
+	/*private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
+			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;*/
+
+	//practice Robot
 	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
 			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;
 

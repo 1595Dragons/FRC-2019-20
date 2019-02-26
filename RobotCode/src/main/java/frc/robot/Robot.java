@@ -15,6 +15,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
+	double kP = 0.0025, kI = 0, kD = .001, kF = 0, 
+	int cruiseVel = 100, maxAccel = 800;
+
+	int kTimeOutMs = 25;
+
 	private RobotMap robot = new RobotMap();
 
 	double wristTicksPerDeg = 2048/180;
@@ -48,7 +53,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void robotInit() {
 		//PID for wrist
 		this.robot.setupTestMode();
-		this.robot.wrist.setPID(0, 0, 0);
+		SmartDashboard.putNumber("kP", kP);
+		SmartDashboard.putNumber("kI", kI);
+		SmartDashboard.putNumber("kD", kD);
+		SmartDashboard.putNumber("kF", kF);
+		SmartDashboard.putNumber("Cruise Vel", cruiseVel);
+		SmartDashboard.putNumber("Max Accel", maxAccel);
 		wristPos = this.robot.wrist.getSelectedSensorPosition();
 		// Limits for the wrist
 		straightUp = -150;
@@ -89,7 +99,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		this.robot.wrist.setPID(.0025, 0, .001);
+		kP = SmartDashboard.getNumber("kP", 0);
+		kI = SmartDashboard.getNumber("kI", 0);
+		kD = SmartDashboard.getNumber("kD", 0);
+		kF = SmartDashboard.getNumber("kF", 0);
+		cruiseVel = (int) SmartDashboard.getNumber("Cruise Vel", 0);
+		maxAccel = (int) SmartDashboard.getNumber("Max Accel", 0);
+		this.robot.wrist.config_kP(0, kP, kTimeOutMs);
+		this.robot.wrist.config_kI(0, kI, kTimeOutMs);
+		this.robot.wrist.config_kD(0, kD, kTimeOutMs);
+		this.robot.wrist.config_kF(0, kF, kTimeOutMs);
+		this.robot.wrist.configMotionCruiseVelocity(/*ticks per 100MS*/cruiseVel, kTimeOutMs);//for 180 deg travel in 2s
+		this.robot.wrist.configMotionAcceleration(/*ticks per 100MS per second*/maxAccel, kTimeOutMs);//for max velocity in .125s
 		wristPos = this.robot.wrist.getSelectedSensorPosition();
 	}
 
@@ -143,14 +164,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void teleopPeriodic() {
 		try {
 			// Calculate drive power
-			double forward = this.robot.driver.getY(Hand.kLeft), turn = this.robot.driver.getX(Hand.kRight)
-					+ this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
+			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .4;
+				//	+ this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
 			if (Math.abs(forward) < 0.2d) {
 				forward = 0;
 			}
-			if (Math.abs(turn) < 0.2d) {
+			/*if (Math.abs(turn) < 0.2d) {
 				turn = this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
-			}
+			}*/
 
 			// Basic west coast drive code
 			if (!this.robot.driver.getStickButton(Hand.kLeft)) {
@@ -170,23 +191,25 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 					(this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight)));
 
 			// Wrist
+			//Update desired position
 			if(Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d){
 				wristPos += this.robot.operator.getY(Hand.kLeft) * 100;
 			}
+			//Gets d-pad inputs
+			if(this.robot.operator.getPOV() != -1 && (this.robot.operator.getPOV() < 90 || this.robot.operator.getPOV() > 270)){
+				double angleInput = this.convertMinus180To180(this.robot.operator.getPOV());
+				wristPos = (angleInput * wristTicksPerDeg) + this.straightUp;
+			}
+			//Don't let desired position get out of hand (even if it does, talon won't let motor keep going)
 			if(wristPos < (straightUp - 85 * this.wristTicksPerDeg)){
 				wristPos = (straightUp - 85 * this.wristTicksPerDeg);
 			}
 			if(wristPos > (straightUp + 85 * this.wristTicksPerDeg)){
 				wristPos = (straightUp + 85 * this.wristTicksPerDeg);
 			}
-			//this.robot.wrist.set(ControlMode.Position, wristPos);
-			this.robot.wrist.driveToPosition(wristPos);
+			//this.robot.wrist.driveToPosition(wristPos);
+			this.robot.wrist.set(ControlMode.MotionMagic, wristPos);
 			SmartDashboard.putNumber("SetPoint", wristPos);
-			//double wristPower = this.robot.operator.getY(Hand.kLeft);
-			//this.robot.wrist.setPower(wristPower + Math.cos(this.robot.wrist.getSelectedSensorPosition() / this.wristTicksPerDeg) * (2.4/12));
-			/*if(this.robot.operator.getPOV() < 90){
-				this.robot.operator.getPOV()
-			}*/
 
 			// Hatch mechanism
 			if (this.robot.operator.getBumper(Hand.kLeft)) {
@@ -213,7 +236,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		}
 	}
 
-	public double clampMinus180To180(double theta){
+	public double convertMinus180To180(double theta){
 		double a = 0;
 		while(a > 180 || a < -180){
 			if(a > 180){
