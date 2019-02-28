@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.XboxController;
@@ -49,7 +50,7 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
-	public Motor leftDrive, rightDrive, wrist, leftIntake, rightIntake;
+	public Motor leftDrive, rightDrive, wrist, leftOuttake, rightOuttake;
 
 	/**
 	 * Declare the solenoids that will be used in the robot, but keep them private,
@@ -111,8 +112,8 @@ public class RobotMap {
 			this.rightDrive2 = new Motor(this.PracticerightDrive2Port);
 			this.rightDrive3 = new Motor(this.PracticerightDrive3Port);
 			this.wrist = new Motor(this.PracticewristPort);
-			this.leftIntake = new Motor(this.PracticeleftOuttakePort);
-			this.rightIntake = new Motor(this.PracticerightOuttakePort);
+			this.leftOuttake = new Motor(this.PracticeleftOuttakePort);
+			this.rightOuttake = new Motor(this.PracticerightOuttakePort);
 		} else {
 			this.leftDrive = new Motor(this.leftDrive1Port);
 			this.leftDrive2 = new Motor(this.leftDrive2Port);
@@ -121,8 +122,8 @@ public class RobotMap {
 			this.rightDrive2 = new Motor(this.rightDrive2Port);
 			this.rightDrive3 = new Motor(this.rightDrive3Port);
 			this.wrist = new Motor(this.wristPort);
-			this.leftIntake = new Motor(this.leftOuttakePort);
-			this.rightIntake = new Motor(this.rightOuttakePort);
+			this.leftOuttake = new Motor(this.leftOuttakePort);
+			this.rightOuttake = new Motor(this.rightOuttakePort);
 		}
 
 		// Setup the encoders
@@ -139,17 +140,21 @@ public class RobotMap {
 		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		// Set the secondary motors to follow the first ones
-		this.leftDrive2.set(ControlMode.Follower, this.leftDrive1Port);
-		this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
-		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
-		this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
-		this.rightIntake.set(ControlMode.Follower, this.leftOuttakePort);
+		this.leftDrive2.set(ControlMode.Follower, this.leftDrive.getDeviceID());
+		this.leftDrive3.set(ControlMode.Follower, this.leftDrive.getDeviceID());
+		this.rightDrive2.set(ControlMode.Follower, this.rightDrive.getDeviceID());
+		this.rightDrive3.set(ControlMode.Follower, this.rightDrive.getDeviceID());
+		this.rightOuttake.set(ControlMode.Follower, this.leftOuttake.getDeviceID());
+
+		// Set the outtakes to break
+		this.rightOuttake.setNeutralMode(NeutralMode.Brake);
+		this.leftOuttake.setNeutralMode(NeutralMode.Brake);
 
 		// Invert necessary drive motors
 		this.leftDrive.setInverted(true);
 		this.leftDrive2.setInverted(true);
 		this.leftDrive3.setInverted(true);
-		this.rightIntake.setInverted(true);
+		this.rightOuttake.setInverted(true);
 
 		// State whether the sensor is in phase with the motor
 		this.wrist.setSensorPhase(true);

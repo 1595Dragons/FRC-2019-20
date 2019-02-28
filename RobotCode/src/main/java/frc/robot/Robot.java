@@ -23,16 +23,17 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	int kTimeOutMs = 25;
 
-	//edu.wpi.first.wpilibj.Timer time;
+	// edu.wpi.first.wpilibj.Timer time;
 
 	double lastTime = -1;
 	double lastVelocity = -1;
 
 	private RobotMap robot = new RobotMap();
 
-	double wristTicksPerDeg = 2048/180;
+	double wristTicksPerDeg = 2048 / 180;
 	double wristPos;
 	int straightUp = -2190;
+
 	/**
 	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
 	 * watch dog...
@@ -59,7 +60,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-		//PID for wrist
+		// PID for wrist
 		this.robot.setupTestMode();
 		SmartDashboard.putNumber("kP", kP);
 		SmartDashboard.putNumber("kI", kI);
@@ -107,7 +108,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.wrist.configForwardSoftLimitEnable(true);
 		this.robot.wrist.configReverseSoftLimitEnable(true);
 
-		//PIDF && Motion Profile constants / configs
+		// PIDF && Motion Profile constants / configs
 		kP = SmartDashboard.getNumber("kP", kP);
 		kI = SmartDashboard.getNumber("kI", kI);
 		kD = SmartDashboard.getNumber("kD", kD);
@@ -119,10 +120,15 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.wrist.config_kI(0, kI, kTimeOutMs);
 		this.robot.wrist.config_kD(0, kD, kTimeOutMs);
 		this.robot.wrist.config_kF(0, kF, kTimeOutMs);
-		this.robot.wrist.configMotionCruiseVelocity(/*ticks per 100MS*/(int) (cruiseVel), kTimeOutMs);//for 180 deg travel in 2s
-		this.robot.wrist.configMotionAcceleration(/*ticks per 100MS per second*/(int) (maxAccel), kTimeOutMs);//for max velocity in .125s
+		this.robot.wrist.configMotionCruiseVelocity(/* ticks per 100MS */(int) (cruiseVel), kTimeOutMs);// for 180 deg
+																										// travel in 2s
+		this.robot.wrist.configMotionAcceleration(/* ticks per 100MS per second */(int) (maxAccel), kTimeOutMs);// for
+																												// max
+																												// velocity
+																												// in
+																												// .125s
 		wristPos = this.robot.wrist.getSelectedSensorPosition();
-		//time.start();
+		// time.start();
 	}
 
 	/**
@@ -153,7 +159,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Wrist Velocity", this.robot.wrist.getSelectedSensorVelocity());
 
 			SmartDashboard.putNumber("Raw Wrist Position", this.robot.wrist.getPosition());
-			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)", (this.robot.wrist.getPosition() - straightUp) / this.wristTicksPerDeg);
+			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)",
+					(this.robot.wrist.getPosition() - straightUp) / this.wristTicksPerDeg);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -180,16 +187,21 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		try {
-			//SmartDashboard.putNumber("Acceleration", (this.robot.wrist.getSelectedSensorVelocity() - lastVelocity) / (time.get() - this.lastTime));
+			// SmartDashboard.putNumber("Acceleration",
+			// (this.robot.wrist.getSelectedSensorVelocity() - lastVelocity) / (time.get() -
+			// this.lastTime));
 			// Calculate drive power
 			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .4;
-				//	+ this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
+			// + this.robot.driver.getTriggerAxis(Hand.kRight) -
+			// this.robot.driver.getTriggerAxis(Hand.kLeft);
 			if (Math.abs(forward) < 0.2d) {
 				forward = 0;
 			}
-			/*if (Math.abs(turn) < 0.2d) {
-				turn = this.robot.driver.getTriggerAxis(Hand.kRight) - this.robot.driver.getTriggerAxis(Hand.kLeft);
-			}*/
+			/*
+			 * if (Math.abs(turn) < 0.2d) { turn =
+			 * this.robot.driver.getTriggerAxis(Hand.kRight) -
+			 * this.robot.driver.getTriggerAxis(Hand.kLeft); }
+			 */
 
 			// Basic west coast drive code
 			if (!this.robot.driver.getStickButton(Hand.kLeft)) {
@@ -204,33 +216,36 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				this.robot.rightDrive.stop();
 			}
 
-			// Intake
-			this.robot.leftIntake.setPower(
+			// Outtake
+			this.robot.leftOuttake.setPower(
 					(this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight)));
 
 			// Wrist
-			//Update desired position
-			if(Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d){
+			// Update desired position
+			if (Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d) {
 				wristPos += this.robot.operator.getY(Hand.kLeft) * 20;
 			}
-			//Gets d-pad inputs
-			if(this.robot.operator.getPOV() != -1 && (this.robot.operator.getPOV() <= 90 || this.robot.operator.getPOV() >= 270)){
+			// Gets d-pad inputs
+			if (this.robot.operator.getPOV() != -1
+					&& (this.robot.operator.getPOV() <= 90 || this.robot.operator.getPOV() >= 270)) {
 				double angleInput = this.convertMinus180To180(this.robot.operator.getPOV());
 				SmartDashboard.putNumber("convert1", this.convertMinus180To180(270));
 				SmartDashboard.putNumber("convert2", this.convertMinus180To180(-270));
 				wristPos = (angleInput * wristTicksPerDeg) + this.straightUp;
 			}
-			//Don't let desired position get out of hand (even if it does, talon won't let motor keep going)
-			if(wristPos < (straightUp - backwardLimit * this.wristTicksPerDeg)){
+			// Don't let desired position get out of hand (even if it does, talon won't let
+			// motor keep going)
+			if (wristPos < (straightUp - backwardLimit * this.wristTicksPerDeg)) {
 				wristPos = (straightUp - backwardLimit * this.wristTicksPerDeg);
 			}
-			if(wristPos > (straightUp + forwardLimit * this.wristTicksPerDeg)){
+			if (wristPos > (straightUp + forwardLimit * this.wristTicksPerDeg)) {
 				wristPos = (straightUp + forwardLimit * this.wristTicksPerDeg);
 			}
-			//this.robot.wrist.driveToPosition(wristPos);
+			// this.robot.wrist.driveToPosition(wristPos);
 			this.robot.wrist.set(ControlMode.MotionMagic, wristPos);
-			//this.robot.wrist.set(ControlMode.Position, wristPos);
-			//this.robot.wrist.t554tg5set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
+			// this.robot.wrist.set(ControlMode.Position, wristPos);
+			// this.robot.wrist.t554tg5set(ControlMode.PercentOutput,
+			// this.robot.operator.getY(Hand.kLeft));
 			SmartDashboard.putNumber("SetPoint", wristPos);
 
 			// Hatch mechanism
@@ -249,7 +264,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.operator.getXButton()) {
 				this.robot.toggleHatchExtension();
 			}
-			//lastTime = time.get();
+			// lastTime = time.get();
 			lastVelocity = this.robot.wrist.getSelectedSensorVelocity();
 			// Display the wrist position
 		} catch (Exception e) {
@@ -257,13 +272,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		}
 	}
 
-	public double convertMinus180To180(double theta){
+	public double convertMinus180To180(double theta) {
 		double a = theta;
-		while(a > 180 || a < -180){
-			if(a > 180){
+		while (a > 180 || a < -180) {
+			if (a > 180) {
 				a -= 360;
-			}
-			else if(a < -180){
+			} else if (a < -180) {
 				a += 360;
 			}
 		}
