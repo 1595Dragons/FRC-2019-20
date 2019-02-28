@@ -21,21 +21,27 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class RobotMap {
 
 	/**
-	 * Get the port mappings for the robot.<br >
-	 * <br >
-	 * Use the phoenix tuner to find these values.
+	 * Create a boolean to check if this is the practice robot
 	 */
+	private final boolean PRACTICEBOT = true;
 
-	// Real Robot
-	/*private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
-			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftIntakePort = 0, rightIntakePort = 12;*/
+	/**
+	 * Practice robot ports
+	 */
+	private final int PracticeleftDrive1Port = 20, PracticeleftDrive2Port = 19, PracticeleftDrive3Port = 17,
+			PracticerightDrive1Port = 24, PracticerightDrive2Port = 23, PracticerightDrive3Port = 21,
+			PracticewristPort = 22, PracticeleftOuttakePort = 13, PracticerightOuttakePort = 18;
 
-	//practice Robot
-	private final int leftDrive1Port = 14, leftDrive2Port = 15, leftDrive3Port = 16, rightDrive1Port = 17,
-			rightDrive2Port = 18, rightDrive3Port = 19, wristPort = 22, leftIntakePort = 20, rightIntakePort = 21;
+	/**
+	 * Real robot
+	 */
+	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
+			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftOuttakePort = 0, rightOuttakePort = 12;
 
 	// Get the Solenoid ports off of the PCM
-	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7; // TODO: Find correct ports
+	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
+			clamperPort2 = 7; // TODO: Find correct ports
+
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
@@ -95,24 +101,37 @@ public class RobotMap {
 	RobotMap() {
 		SmartDashboard.putNumber("Driver RX", this.driver.getY(Hand.kRight));
 
-		// Apply port addresses to the robot
-		this.leftDrive = new Motor(this.leftDrive1Port);
-		this.leftDrive2 = new Motor(this.leftDrive2Port);
-		this.leftDrive3 = new Motor(this.leftDrive3Port);
-		this.rightDrive = new Motor(this.rightDrive1Port);
-		this.rightDrive2 = new Motor(this.rightDrive2Port);
-		this.rightDrive3 = new Motor(this.rightDrive3Port);
-		this.wrist = new Motor(this.wristPort);
-		this.leftIntake = new Motor(this.leftIntakePort);
-		this.rightIntake = new Motor(this.rightIntakePort);
+		// Apply port addresses to the robot, based on whether or not it is the practice
+		// bot.
+		if (this.PRACTICEBOT) {
+			this.leftDrive = new Motor(this.PracticeleftDrive1Port);
+			this.leftDrive2 = new Motor(this.PracticeleftDrive2Port);
+			this.leftDrive3 = new Motor(this.PracticeleftDrive3Port);
+			this.rightDrive = new Motor(this.PracticerightDrive1Port);
+			this.rightDrive2 = new Motor(this.PracticerightDrive2Port);
+			this.rightDrive3 = new Motor(this.PracticerightDrive3Port);
+			this.wrist = new Motor(this.PracticewristPort);
+			this.leftIntake = new Motor(this.PracticeleftOuttakePort);
+			this.rightIntake = new Motor(this.PracticerightOuttakePort);
+		} else {
+			this.leftDrive = new Motor(this.leftDrive1Port);
+			this.leftDrive2 = new Motor(this.leftDrive2Port);
+			this.leftDrive3 = new Motor(this.leftDrive3Port);
+			this.rightDrive = new Motor(this.rightDrive1Port);
+			this.rightDrive2 = new Motor(this.rightDrive2Port);
+			this.rightDrive3 = new Motor(this.rightDrive3Port);
+			this.wrist = new Motor(this.wristPort);
+			this.leftIntake = new Motor(this.leftOuttakePort);
+			this.rightIntake = new Motor(this.rightOuttakePort);
+		}
 
 		// Setup the encoders
 		this.popper = new DoubleSolenoid(popperPort1, popperPort2);
-		//this.popper.setPulseDuration(0.02d);
+		// this.popper.setPulseDuration(0.02d);
 		this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
-		//this.extender.setPulseDuration(0.02d);
+		// this.extender.setPulseDuration(0.02d);
 		this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
-		//this.clamper.setPulseDuration(0.02d);
+		// this.clamper.setPulseDuration(0.02d);
 
 		// Setup encoders
 		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -124,7 +143,7 @@ public class RobotMap {
 		this.leftDrive3.set(ControlMode.Follower, this.leftDrive1Port);
 		this.rightDrive2.set(ControlMode.Follower, this.rightDrive1Port);
 		this.rightDrive3.set(ControlMode.Follower, this.rightDrive1Port);
-		this.rightIntake.set(ControlMode.Follower, this.leftIntakePort);
+		this.rightIntake.set(ControlMode.Follower, this.leftOuttakePort);
 
 		// Invert necessary drive motors
 		this.leftDrive.setInverted(true);

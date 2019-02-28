@@ -32,7 +32,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	double wristTicksPerDeg = 2048/180;
 	double wristPos;
-	int straightUp = -2190;;
+	int straightUp = -2190;
 	/**
 	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
 	 * watch dog...
