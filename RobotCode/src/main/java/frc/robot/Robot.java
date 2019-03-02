@@ -189,7 +189,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// (this.robot.wrist.getSelectedSensorVelocity() - lastVelocity) / (time.get() -
 			// this.lastTime));
 			// Calculate drive power
-			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .4;
+			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .25;
 			// + this.robot.driver.getTriggerAxis(Hand.kRight) -
 			// this.robot.driver.getTriggerAxis(Hand.kLeft);
 			if (Math.abs(forward) < 0.2d) {
