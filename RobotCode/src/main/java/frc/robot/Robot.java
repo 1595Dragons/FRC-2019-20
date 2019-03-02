@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import java.util.Timer;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -19,7 +17,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	double kP = 2, kI = 0, kD = 0, kF = 0;
 	int cruiseVel = 200, maxAccel = 800;
 
-	int forwardLimit = 90, backwardLimit = 85;
+	int forwardLimit = 90, backwardLimit = 90;
 
 	int kTimeOutMs = 25;
 
@@ -261,7 +259,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.operator.getBButtonPressed()) {
 				this.robot.togglePopper();
 			}
-			if (this.robot.operator.getXButton()) {
+			if (this.robot.operator.getXButtonPressed()) {
 				this.robot.toggleHatchExtension();
 			}
 			// lastTime = time.get();

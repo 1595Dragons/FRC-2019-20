@@ -40,9 +40,17 @@ public class RobotMap {
 			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftOuttakePort = 0, rightOuttakePort = 12;
 
 	// Get the Solenoid ports off of the PCM
+
+	//Practice Bot
+	private final int PracticepopperPort1 = 2, PracticepopperPort2 = 6, PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
+		PracticeclamperPort2 = 5;
+
+
 	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
 			clamperPort2 = 7; // TODO: Find correct ports
 
+
+	
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
@@ -126,14 +134,23 @@ public class RobotMap {
 			this.rightOuttake = new Motor(this.rightOuttakePort);
 		}
 
-		// Setup the encoders
-		this.popper = new DoubleSolenoid(popperPort1, popperPort2);
-		// this.popper.setPulseDuration(0.02d);
-		this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
-		// this.extender.setPulseDuration(0.02d);
-		this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
-		// this.clamper.setPulseDuration(0.02d);
-
+		if (this.PRACTICEBOT == false) {
+			// Setup the encoders
+			this.popper = new DoubleSolenoid(popperPort1, popperPort2);
+			// this.popper.setPulseDuration(0.02d);
+			this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
+			// this.extender.setPulseDuration(0.02d);
+			this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
+			// this.clamper.setPulseDuration(0.02d);
+		} else{
+			// Setup the encoders
+			this.popper = new DoubleSolenoid(PracticepopperPort1, PracticepopperPort2);
+			// this.popper.setPulseDuration(0.02d);
+			this.extender = new DoubleSolenoid(PracticeextenderPort1, PracticeextenderPort2);
+			// this.extender.setPulseDuration(0.02d);
+			this.clamper = new DoubleSolenoid(PracticeclamperPort1, PracticeclamperPort2);
+			// this.clamper.setPulseDuration(0.02d);
+		}
 		// Setup encoders
 		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -282,7 +299,7 @@ public class RobotMap {
 	 */
 	public void testMotors() {
 		double power = this.driver.getY(edu.wpi.first.wpilibj.GenericHID.Hand.kLeft);
-		if (Math.abs(power) > 0.1d) {
+		if (Math.abs(power) > 0.2d) {
 			this.chooser.getSelected().setPower(power);
 		} else {
 			this.chooser.getSelected().stop();
