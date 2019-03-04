@@ -45,7 +45,7 @@ public class RobotMap {
 	private final int PracticepopperPort1 = 2, PracticepopperPort2 = 6, PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
 		PracticeclamperPort2 = 5;
 
-
+	//Real Robot
 	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
 			clamperPort2 = 7; // TODO: Find correct ports
 
@@ -108,7 +108,6 @@ public class RobotMap {
 	 * during <code>robotInit()</code>).
 	 */
 	RobotMap() {
-		SmartDashboard.putNumber("Driver RX", this.driver.getY(Hand.kRight));
 
 		// Apply port addresses to the robot, based on whether or not it is the practice
 		// bot.
