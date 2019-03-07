@@ -7,9 +7,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
@@ -41,16 +39,16 @@ public class RobotMap {
 
 	// Get the Solenoid ports off of the PCM
 
-	//Practice Bot
-	private final int PracticepopperPort1 = 2, PracticepopperPort2 = 6, PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
-		PracticeclamperPort2 = 5;
+	// Practice Bot
+	private final int PracticepopperPort1 = 2, PracticepopperPort2 = 6, PracticeextenderPort1 = 1,
+			PracticeextenderPort2 = 4, PracticeclamperPort1 = 0, PracticeclamperPort2 = 5;
 
-	//Real Robot
+	// Real Robot
 	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
 			clamperPort2 = 7; // TODO: Find correct ports
 
+	private int currentlimit = 10;
 
-	
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
 	 * classes. Don't initalize them yet.
@@ -141,7 +139,7 @@ public class RobotMap {
 			// this.extender.setPulseDuration(0.02d);
 			this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
 			// this.clamper.setPulseDuration(0.02d);
-		} else{
+		} else {
 			// Setup the encoders
 			this.popper = new DoubleSolenoid(PracticepopperPort1, PracticepopperPort2);
 			// this.popper.setPulseDuration(0.02d);
@@ -174,6 +172,11 @@ public class RobotMap {
 
 		// State whether the sensor is in phase with the motor
 		this.wrist.setSensorPhase(true);
+
+		// Config current limit
+		this.leftDrive.configContinuousCurrentLimit(currentlimit, 25);
+		this.rightDrive.configContinuousCurrentLimit(currentlimit, 25);
+		this.wrist.configContinuousCurrentLimit(currentlimit, 25);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
