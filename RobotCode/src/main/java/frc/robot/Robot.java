@@ -208,6 +208,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 			// Outtake
 			this.robot.leftOuttake.setPower(this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight));
+			if(this.robot.operator.getYButton()){
+				this.robot.leftOuttake.setPower(.5);
+			}
+			else if(this.robot.operator.getStickButton(Hand.kLeft)){
+				this.robot.leftOuttake.setPower(-.5);
+			}
 
 			// Wrist
 			// Update desired position
