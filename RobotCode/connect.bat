@@ -1,0 +1,1 @@
+netsh wlan connect name="1595_Practice"
