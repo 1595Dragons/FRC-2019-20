@@ -21,6 +21,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	int cruiseVel = 200, maxAccel = 800;
 	double arbFeedForward = 0;
 
+	double outtakePresetSpeed = .5;
+
 	int forwardLimit = 90, backwardLimit = 90;
 
 	int kTimeOutMs = 25;
@@ -65,6 +67,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		SmartDashboard.putNumber("kD", kD);
 		SmartDashboard.putNumber("kF", kF);
 		SmartDashboard.putNumber("kG", kG);
+		SmartDashboard.putNumber("Outtake Preset Speed", outtakePresetSpeed);
 		SmartDashboard.putNumber("Left side multiplier", multiplyLeft);
 		SmartDashboard.putNumber("iZone", iZone);
 		SmartDashboard.putNumber("Cruise Vel", cruiseVel);
@@ -116,6 +119,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		kD = SmartDashboard.getNumber("kD", kD);
 		kF = SmartDashboard.getNumber("kF", kF);
 		kG = SmartDashboard.getNumber("kG", kG);
+		outtakePresetSpeed = SmartDashboard.getNumber("Outtake Preset Speed", outtakePresetSpeed);
 		multiplyLeft = SmartDashboard.getNumber("Left side multiplier", multiplyLeft);
 		iZone = (int) SmartDashboard.getNumber("iZone", iZone);
 		cruiseVel = (int) SmartDashboard.getNumber("Cruise Vel", 0);
@@ -217,10 +221,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				}
 				//op buttons
 				else if(this.robot.operator.getBumper(Hand.kLeft)){
-					this.robot.leftOuttake.setPower(.5);
+					this.robot.leftOuttake.setPower(outtakePresetSpeed);
 				}
 				else if(this.robot.operator.getBumper(Hand.kRight)){
-					this.robot.leftOuttake.setPower(-.5);
+					this.robot.leftOuttake.setPower(-outtakePresetSpeed);
 				}
 				//if no input on op, set to 0
 				else{
@@ -235,7 +239,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				}
 				//Buttons
 				else if(this.robot.operator.getBumper(Hand.kLeft)){
-					this.robot.leftOuttake.setPower(-.5);
+					this.robot.leftOuttake.setPower(-outtakePresetSpeed);
 				}
 				//Stop
 				else{
