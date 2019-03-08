@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -47,6 +48,8 @@ public class RobotMap {
 	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
 			clamperPort2 = 7; // TODO: Find correct ports
 
+	private final int ballInPort = 0;
+	
 	private int currentlimit = 10;
 
 	/**
@@ -72,6 +75,7 @@ public class RobotMap {
 	 */
 	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
 
+	public DigitalInput ballIn;
 	/**
 	 * Setup the controllers for the drivers.
 	 */
@@ -152,6 +156,8 @@ public class RobotMap {
 		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+
+		this.ballIn = new DigitalInput(ballInPort);
 
 		// Set the secondary motors to follow the first ones
 		this.leftDrive2.set(ControlMode.Follower, this.leftDrive.getDeviceID());

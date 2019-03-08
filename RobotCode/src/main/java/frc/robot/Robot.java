@@ -208,13 +208,41 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// Outtake
-			this.robot.leftOuttake.setPower(
-					this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight));
-			if (this.robot.operator.getYButton()) {
-				this.robot.leftOuttake.setPower(.5);
-			} else if (this.robot.operator.getStickButton(Hand.kLeft)) {
-				this.robot.leftOuttake.setPower(-.5);
+
+			//If the sensor sees nothing
+			if(this.robot.ballIn.get()){
+				//op triggers override buttons
+				if(this.robot.operator.getTriggerAxis(Hand.kLeft) > .1 || this.robot.operator.getTriggerAxis(Hand.kRight) > .1){
+					this.robot.leftOuttake.setPower(this.robot.operator.getTriggerAxis(Hand.kLeft) - this.robot.operator.getTriggerAxis(Hand.kRight));
+				}
+				//op buttons
+				else if(this.robot.operator.getBumper(Hand.kLeft)){
+					this.robot.leftOuttake.setPower(.5);
+				}
+				else if(this.robot.operator.getBumper(Hand.kRight)){
+					this.robot.leftOuttake.setPower(-.5);
+				}
+				//if no input on op, set to 0
+				else{
+					this.robot.leftOuttake.setPower(0);
+				}
 			}
+			//if a ball is sensed only allow outtaking
+			else{
+				//Triggers override buttons
+				if(this.robot.operator.getTriggerAxis(Hand.kRight) > .1){
+					this.robot.leftOuttake.setPower(-this.robot.operator.getTriggerAxis(Hand.kRight));
+				}
+				//Buttons
+				else if(this.robot.operator.getBumper(Hand.kLeft)){
+					this.robot.leftOuttake.setPower(-.5);
+				}
+				//Stop
+				else{
+					this.robot.leftOuttake.setPower(0);
+				}
+			}
+
 
 			// Wrist
 			// Update desired position
@@ -243,12 +271,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 					arbFeedForward);
 
 			// Hatch mechanism
-			if (this.robot.operator.getBumper(Hand.kLeft)) {
-				this.robot.extendHatch();
-			}
-			if (this.robot.operator.getBumper(Hand.kRight)) {
-				this.robot.retracthHatch();
-			}
 			if (this.robot.operator.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
 			}
