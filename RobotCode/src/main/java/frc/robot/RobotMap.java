@@ -4,8 +4,11 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -19,11 +22,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
  * @author Stephen - FRC 1595
  */
 public class RobotMap {
-
+	
 	/**
 	 * Create a boolean to check if this is the practice robot
 	 */
-	private final boolean PRACTICEBOT = true;
+	public boolean PRACTICEBOT = false;
 
 	/**
 	 * Practice robot ports
@@ -35,20 +38,21 @@ public class RobotMap {
 	/**
 	 * Real robot
 	 */
-	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 8,
-			rightDrive2Port = 10, rightDrive3Port = 11, wristPort = 9, leftOuttakePort = 0, rightOuttakePort = 12;
+	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 10,
+			rightDrive2Port = 8, rightDrive3Port = 11, wristPort = 9, leftOuttakePort = 0, rightOuttakePort = 12;
 
 	// Get the Solenoid ports off of the PCM
 
 	// Practice Bot
-	private final int PracticepopperPort1 = 2, PracticepopperPort2 = 6, PracticeextenderPort1 = 1,
-			PracticeextenderPort2 = 4, PracticeclamperPort1 = 0, PracticeclamperPort2 = 5;
+	private final int PracticeextenderPort1 = 1,PracticeextenderPort2 = 4, PracticeclamperPort1 = 0, PracticeclamperPort2 = 5;
+	private final int Practicenothing1Port = 2, Practicenothing2Port = 7;
+
 
 	// Real Robot
-	private final int popperPort1 = 1, popperPort2 = 4, extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3,
-			clamperPort2 = 7; // TODO: Find correct ports
+	private final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7; // TODO: Find correct ports
+	private final int nothing1Port = 4, nothing2Port = 0;
 
-	private final int ballInPort = 0;
+	private final int ballInPort = 0, limeLightServoPort = 1;
 	
 	private int currentlimit = 10;
 
@@ -66,7 +70,8 @@ public class RobotMap {
 	 * in order to encourage the use of the functions in this class. Also dont
 	 * initalize them.
 	 */
-	private DoubleSolenoid popper, extender, clamper;
+	private DoubleSolenoid extender, clamper;
+	public Solenoid nothing1, nothing2;
 
 	/**
 	 * Declare the motors that will be used on the robot, but that shouldnt be used
@@ -76,6 +81,7 @@ public class RobotMap {
 	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
 
 	public DigitalInput ballIn;
+	public Servo limeLightServo;
 	/**
 	 * Setup the controllers for the drivers.
 	 */
@@ -88,7 +94,7 @@ public class RobotMap {
 	 * Also, the stream produced by the camera can be viewed at:
 	 * {@link https://roborio-1595-frc.local:1181/?action=stream}
 	 */
-	public edu.wpi.cscore.UsbCamera driverCam;
+	public edu.wpi.cscore.UsbCamera driverCam1, driverCam2;
 
 	/**
 	 * Declare a private global boolean for the hatch panel mechanism functions.
@@ -136,28 +142,23 @@ public class RobotMap {
 		}
 
 		if (this.PRACTICEBOT == false) {
-			// Setup the encoders
-			this.popper = new DoubleSolenoid(popperPort1, popperPort2);
-			// this.popper.setPulseDuration(0.02d);
 			this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
-			// this.extender.setPulseDuration(0.02d);
 			this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
-			// this.clamper.setPulseDuration(0.02d);
+			this.nothing1 = new Solenoid(nothing1Port);
+			this.nothing2 = new Solenoid(nothing2Port);
 		} else {
-			// Setup the encoders
-			this.popper = new DoubleSolenoid(PracticepopperPort1, PracticepopperPort2);
-			// this.popper.setPulseDuration(0.02d);
 			this.extender = new DoubleSolenoid(PracticeextenderPort1, PracticeextenderPort2);
-			// this.extender.setPulseDuration(0.02d);
 			this.clamper = new DoubleSolenoid(PracticeclamperPort1, PracticeclamperPort2);
-			// this.clamper.setPulseDuration(0.02d);
+			this.nothing1 = new Solenoid(Practicenothing1Port);
+			this.nothing2 = new Solenoid(Practicenothing2Port);
 		}
 		// Setup encoders
-		// this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-		// this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		this.ballIn = new DigitalInput(ballInPort);
+		this.limeLightServo = new Servo(limeLightServoPort);
 
 		// Set the secondary motors to follow the first ones
 		this.leftDrive2.set(ControlMode.Follower, this.leftDrive.getDeviceID());
@@ -166,9 +167,11 @@ public class RobotMap {
 		this.rightDrive3.set(ControlMode.Follower, this.rightDrive.getDeviceID());
 		this.rightOuttake.set(ControlMode.Follower, this.leftOuttake.getDeviceID());
 
-		// Set the outtakes to break
+		// Set the motors to break
 		this.rightOuttake.setNeutralMode(NeutralMode.Brake);
 		this.leftOuttake.setNeutralMode(NeutralMode.Brake);
+		this.rightDrive.setNeutralMode(NeutralMode.Brake);
+		this.leftDrive.setNeutralMode(NeutralMode.Brake);
 
 		// Invert necessary drive motors
 		this.leftDrive.setInverted(true);
@@ -177,6 +180,8 @@ public class RobotMap {
 		this.rightOuttake.setInverted(true);
 
 		// State whether the sensor is in phase with the motor
+		this.rightDrive.setSensorPhase(true);
+		this.leftDrive.setSensorPhase(true);
 		this.wrist.setSensorPhase(true);
 
 		// Config current limit
@@ -187,9 +192,12 @@ public class RobotMap {
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
 		try {
-			// this.driverCam = CameraServer.getInstance().startAutomaticCapture(0);
-			// this.driverCam.setFPS(15);
-			// this.driverCam.setResolution(320, 240);
+			this.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
+			this.driverCam1.setFPS(15);
+			this.driverCam1.setResolution(320, 240);
+			this.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
+			this.driverCam2.setFPS(15);
+			this.driverCam2.setResolution(320, 240);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -228,22 +236,6 @@ public class RobotMap {
 	}
 
 	/**
-	 * Pops the ball.
-	 */
-	public void pop() {
-		this.popper.set(Value.kForward);
-		this.popped = true;
-	}
-
-	/**
-	 * Petracts the popper.
-	 */
-	public void dePop() {
-		this.popper.set(Value.kReverse);
-		this.popped = false;
-	}
-
-	/**
 	 * Toggles the hatch panel mechanism. Either releasing or securing the hatch
 	 * panel.
 	 */
@@ -263,17 +255,6 @@ public class RobotMap {
 			this.retracthHatch();
 		} else {
 			this.extendHatch();
-		}
-	}
-
-	/**
-	 * Toggles the ball popper doo-dad.
-	 */
-	public void togglePopper() {
-		if (this.popped) {
-			this.dePop();
-		} else {
-			this.pop();
 		}
 	}
 
