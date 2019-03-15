@@ -17,7 +17,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	boolean manualOveride = false;
 	double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075;
-	double DTkP = 2, DTkI = 0.003, DTkD = 0, LDTkF = 2, RDTkF = 2;
+	double DTkP = 2, DTkI = 0.003, DTkD = 0, LDTkF = 1.5, RDTkF = 1.5;
 	int iZone = 100;
 	int cruiseVel = 200, maxAccel = 800;
 	double maxVelDT = 400;
@@ -90,7 +90,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			zero = 1874;
 		}
 		else{
-			zero = -2045;
+			zero = -2040;
 		}
 		minus180 = zero-2048;
 		straightUp = (zero + minus180) / 2;
