@@ -316,9 +316,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			else if(this.robot.operator.getBumper(Hand.kLeft)){
 				wristSetPoint = straightUp + exchangePosOffset;
 			}
-			if(this.robot.operator.getPOV() >= 0 && this.robot.operator.getPOV() <= 180){
+			/*if(this.robot.operator.getPOV() >= 0 && this.robot.operator.getPOV() <= 180){
 				this.robot.limeLightServo.setAngle(this.robot.operator.getPOV());
-			}
+			}*/
 			// Don't let desired position get out of hand (even if it does, talon won't let
 			// motor keep going)
 			/*if (wristSetPoint < (straightUp - wristAngToTick(backwardLimit))) {
