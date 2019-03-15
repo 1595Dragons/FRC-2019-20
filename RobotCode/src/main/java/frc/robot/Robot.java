@@ -160,6 +160,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.wrist.configMotionCruiseVelocity(/* ticks per 100MS */(int) (cruiseVel), kTimeOutMs);
 		this.robot.wrist.configMotionAcceleration(/* ticks per 100MS per second */(int) (maxAccel), kTimeOutMs);
 		wristSetPoint = this.robot.wrist.getSelectedSensorPosition();
+		this.robot.wrist.set(ControlMode.PercentOutput, 0);
 		this.robot.leftDrive.config_kP(0, DTkP);
 		this.robot.leftDrive.config_kI(0, DTkI);
 		this.robot.leftDrive.config_kD(0, DTkD);
