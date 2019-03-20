@@ -116,6 +116,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		this.teleopInit();
 	}
 
 	/**
@@ -169,6 +170,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.rightDrive.config_kI(0, DTkI);
 		this.robot.rightDrive.config_kD(0, DTkD);
 		this.robot.rightDrive.config_kF(0, RDTkF);
+
+		// Close the hatch stuff
+		this.robot.secureHatchPanel();
 	}
 
 	/**
@@ -223,6 +227,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		this.teleopPeriodic();
 	}
 
 	/**
