@@ -7,23 +7,34 @@
 
 package frc.robot;
 
+import javax.sound.sampled.FloatControl.Type;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	boolean manualOveride = false;
 	double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075;
-	double DTkP = 2, DTkI = 0.003, DTkD = 0, LDTkF = 1.5, RDTkF = 1.5;
+	double viskP = 3, viskI = 0.01, viskD = 0;
+	double DTkP = 2, DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1;
 	int iZone = 100;
 	int cruiseVel = 200, maxAccel = 800;
 	double maxVelDT = 400;
 	double arbFeedForward = 0;
+	boolean visEnabled = false;
+	double vis = 0;
 
-	double outtakePresetSpeed = .65;
+	MiniPID pid = new MiniPID(viskP, viskI, viskD);
+
+	double outtakePresetSpeed = .55;
 
 	int forwardLimit = 90, backwardLimit = 90;
 
@@ -38,6 +49,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	double zero;
 	double minus180;
 	double straightUp;
+
+	NetworkTable limelight_shit;
 
 
 	/**
@@ -69,6 +82,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		// PID for wrist
 		this.robot.setupTestMode();
 		SmartDashboard.putNumber("kP", kP);
+		SmartDashboard.putNumber("viskP", viskP);
+		SmartDashboard.putNumber("viskI", viskI);
+		SmartDashboard.putNumber("viskD", viskD);
 		SmartDashboard.putNumber("kI", kI);
 		SmartDashboard.putNumber("kD", kD);
 		SmartDashboard.putNumber("kF", kF);
@@ -86,11 +102,13 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.wrist.configAllowableClosedloopError(0, 10);
 		wristSetPoint = this.robot.wrist.getSelectedSensorPosition();
 
+		this.limelight_shit = NetworkTableInstance.getDefault().getTable("limelight");
+
 		if(this.robot.PRACTICEBOT){
 			zero = 1874;
 		}
 		else{
-			zero = -2040;
+			zero = 2040;
 		}
 		minus180 = zero-2048;
 		straightUp = (zero + minus180) / 2;
@@ -139,6 +157,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 		// PIDF && Motion Profile constants / configs
 		kP = SmartDashboard.getNumber("kP", kP);
+		viskP = SmartDashboard.getNumber("viskP", viskP);
+		viskI = SmartDashboard.getNumber("viskI", viskI);
+		viskD = SmartDashboard.getNumber("viskD", viskD);
+		pid.setP(viskP);
+		pid.setI(viskI);
+		pid.setD(viskD);
 		kI = SmartDashboard.getNumber("kI", kI);
 		kD = SmartDashboard.getNumber("kD", kD);
 		kF = SmartDashboard.getNumber("kF", kF);
@@ -209,6 +233,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("I Accumulation", this.robot.wrist.getIntegralAccumulator());
 
 			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
+
+			// If the limelight stuff is not null, show its values
+			if (this.limelight_shit != null) {
+				SmartDashboard.putBoolean("Limelight target valid", this.limelight_shit.getEntry("tv").getDouble(0) == 1 ? true : false);
+				SmartDashboard.putNumber("Limelight Horizontal Offset", this.limelight_shit.getEntry("tx").getDouble(0));
+				SmartDashboard.putNumber("Limelight Vertical Offset", this.limelight_shit.getEntry("ty").getDouble(0));
+
+				// d = (h2-h1) / tan(a1+a2)
+				double distance = (28.5 - 11) / Math.tan(Math.toRadians(this.limelight_shit.getEntry("tx").getDouble(0)));
+				SmartDashboard.putNumber("Distance", distance);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -256,20 +292,49 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				this.robot.leftDrive.stop();
 				this.robot.rightDrive.stop();
 			}*/
+
+			pid.setSetpoint(3.46);
+			if(this.wristSetPoint == zero || this.limelight_shit.getEntry("tv").getDouble(0) != 1){
+				this.visEnabled = false;
+			}
+			if(this.visEnabled){
+				vis = pid.getOutput(this.limelight_shit.getEntry("ty").getDouble(0));
+			}
+			else{
+				vis = 0;
+			}
+			if(Math.abs(this.limelight_shit.getEntry("ty").getDouble(0) - 3.46) < 1 && visEnabled){
+				this.robot.driver.setRumble(RumbleType.kLeftRumble, .1);
+				this.robot.driver.setRumble(RumbleType.kRightRumble, .1);
+				this.robot.operator.setRumble(RumbleType.kLeftRumble, .1);
+				this.robot.operator.setRumble(RumbleType.kRightRumble, .1);
+			}
+			else{
+				this.robot.driver.setRumble(RumbleType.kLeftRumble, 0);
+				this.robot.driver.setRumble(RumbleType.kRightRumble, 0);
+				this.robot.operator.setRumble(RumbleType.kLeftRumble, 0);
+				this.robot.operator.setRumble(RumbleType.kRightRumble, 0);
+			}
+			if(this.robot.driver.getAButtonPressed()){
+				visEnabled = !visEnabled;
+			}
+			SmartDashboard.putBoolean("Vision Enabled", visEnabled);
+			SmartDashboard.putNumber("Vision Output", vis);
+
 			if (!this.robot.driver.getStickButton(Hand.kLeft)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * maxVelDT);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * maxVelDT);
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * maxVelDT - vis);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * maxVelDT + vis);
 				SmartDashboard.putNumber("lVel", (forward - turn) * .4 * maxVelDT);
 				SmartDashboard.putNumber("lerror", this.robot.leftDrive.getClosedLoopError());
 				SmartDashboard.putNumber("rVel", (forward + turn) * .4 * maxVelDT);
 				SmartDashboard.putNumber("rerror", this.robot.rightDrive.getClosedLoopError());
 			} else {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * maxVelDT);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * maxVelDT);
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * maxVelDT - vis);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * maxVelDT + vis);
 			}
 			if (forward == 0 && turn == 0) {
-				this.robot.leftDrive.set(ControlMode.Velocity, 0);
-				this.robot.rightDrive.set(ControlMode.Velocity, 0);
+				this.robot.leftDrive.set(ControlMode.Velocity, - vis);
+				this.robot.rightDrive.set(ControlMode.Velocity, + vis);
 			}
 
 			// Outtake
@@ -349,6 +414,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.operator.getXButtonPressed()) {
 				this.robot.toggleHatchExtension();
 			}
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
