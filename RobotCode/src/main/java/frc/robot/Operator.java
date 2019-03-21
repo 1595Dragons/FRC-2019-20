@@ -1,3 +1,4 @@
+package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Operator extends XboxController { // TODO Finish me (Stephen's job)
