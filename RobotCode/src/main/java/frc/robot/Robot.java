@@ -21,9 +21,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
+	boolean neg = false;
 	boolean manualOveride = false;
 	double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075;
-	double viskP = 3, viskI = 0.01, viskD = 0;
+	double viskP = 4, viskI = 0.01, viskD = 0;
 	double DTkP = 2, DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1;
 	int iZone = 100;
 	int cruiseVel = 200, maxAccel = 800;
@@ -31,6 +32,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	double arbFeedForward = 0;
 	boolean visEnabled = false;
 	double vis = 0;
+	double visSetpoint = 3;
 
 	MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
@@ -103,12 +105,15 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		wristSetPoint = this.robot.wrist.getSelectedSensorPosition();
 
 		this.limelight_shit = NetworkTableInstance.getDefault().getTable("limelight");
+		if (this.limelight_shit != null) {
+			SmartDashboard.putBoolean("LED", true);
+		}
 
 		if(this.robot.PRACTICEBOT){
 			zero = 1874;
 		}
 		else{
-			zero = 2040;
+			zero = 2050;
 		}
 		minus180 = zero-2048;
 		straightUp = (zero + minus180) / 2;
@@ -240,6 +245,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				SmartDashboard.putNumber("Limelight Horizontal Offset", this.limelight_shit.getEntry("tx").getDouble(0));
 				SmartDashboard.putNumber("Limelight Vertical Offset", this.limelight_shit.getEntry("ty").getDouble(0));
 
+				if (this.isDisabled()) {
+ 					double limelightLED = SmartDashboard.getBoolean("LED", true) ? 3 : 1;
+					this.limelight_shit.getEntry("ledMode").setNumber(limelightLED);
+				}
+
 				// d = (h2-h1) / tan(a1+a2)
 				double distance = (28.5 - 11) / Math.tan(Math.toRadians(this.limelight_shit.getEntry("tx").getDouble(0)));
 				SmartDashboard.putNumber("Distance", distance);
@@ -293,7 +303,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				this.robot.rightDrive.stop();
 			}*/
 
-			pid.setSetpoint(3.46);
+			pid.setSetpoint(visSetpoint);
 			if(this.wristSetPoint == zero || this.limelight_shit.getEntry("tv").getDouble(0) != 1){
 				this.visEnabled = false;
 			}
@@ -303,7 +313,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			else{
 				vis = 0;
 			}
-			if(Math.abs(this.limelight_shit.getEntry("ty").getDouble(0) - 3.46) < 1 && visEnabled){
+			if(Math.abs(this.limelight_shit.getEntry("ty").getDouble(0) - visSetpoint) < 1 && visEnabled){
 				this.robot.driver.setRumble(RumbleType.kLeftRumble, .1);
 				this.robot.driver.setRumble(RumbleType.kRightRumble, .1);
 				this.robot.operator.setRumble(RumbleType.kLeftRumble, .1);
@@ -364,7 +374,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Wrist
 			// Update desired position
 			if (Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d) {
-				wristSetPoint += this.robot.operator.getY(Hand.kLeft) * 20;
+				wristSetPoint += this.robot.operator.getY(Hand.kLeft) * 40;
 			}
 			// Gets d-pad inputs
 			/*if (this.robot.operator.getPOV() == 0 || this.robot.operator.getPOV() == 90 || this.robot.operator.getPOV() == 270) {
@@ -413,6 +423,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 			if (this.robot.operator.getXButtonPressed()) {
 				this.robot.toggleHatchExtension();
+			}
+
+			if (this.limelight_shit != null) {
+				if (wristSetPoint == this.zero) {
+					this.limelight_shit.getEntry("ledMode").setNumber(1);
+				} else {
+					this.limelight_shit.getEntry("ledMode").setNumber(3);
+				}
 			}
 
 
