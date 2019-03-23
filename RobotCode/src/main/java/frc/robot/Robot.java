@@ -16,9 +16,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
-	private boolean neg = true, manualOveride = false, visEnabled = false;
+	private boolean neg = true, manualOveride = false, visEnabled = false, manualWrist = false;
 
-	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, viskP = 4, viskI = 0.01, viskD = 0, DTkP = 2,
+	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, viskP = 4, viskI = 0.01, viskD = 0, DTkP = 5,
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
 			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 200, zero,
 			minus180, straightUp;
@@ -410,8 +410,16 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			this.arbFeedForward = -Math.sin(
 					wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
 					* this.kG;
-			this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
+				if(!this.manualOveride){
+				this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
 					this.arbFeedForward);
+				}
+				else{
+					this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft);
+				}
+				if(this.robot.operator.getBButtonPressed()){
+					this.manualOveride = !manualOveride;
+				}
 
 			// Hatch mechanism
 			if (this.robot.operator.getAButtonPressed()) {

@@ -62,7 +62,7 @@ public class RobotMap {
 	private final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7, nothing1Port = 4,
 			nothing2Port = 0, ballInPort = 0, limeLightServoPort = 1;
 
-	private int currentlimit = 10;
+	private int currentlimit = 15;
 
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
@@ -195,18 +195,24 @@ public class RobotMap {
 		this.wrist.setSensorPhase(true);
 
 		// Config current limit
-		this.leftDrive.configContinuousCurrentLimit(this.currentlimit, 25);
-		this.rightDrive.configContinuousCurrentLimit(this.currentlimit, 25);
-		this.wrist.configContinuousCurrentLimit(this.currentlimit, 25);
+		this.leftDrive.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive.configContinuousCurrentLimit(this.currentlimit);
+		this.leftDrive2.configContinuousCurrentLimit(this.currentlimit);
+		this.leftDrive3.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive2.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive3.configContinuousCurrentLimit(this.currentlimit);
+		this.wrist.configContinuousCurrentLimit(10);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
 		try {
 			this.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
-			this.driverCam1.setFPS(10);
-			this.driverCam1.setResolution(320, 240);
+			this.driverCam1.setFPS(3);
+			this.driverCam1.setResolution(320/2, 240/2);
+			this.driverCam1.setExposureManual(40);
+			this.driverCam1.setBrightness(40);
 			this.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
-			this.driverCam2.setFPS(7);
+			this.driverCam2.setFPS(15);
 			this.driverCam2.setResolution(320, 240);
 			this.driverCam2.setExposureManual(75);
 			this.driverCam2.setBrightness(75);
