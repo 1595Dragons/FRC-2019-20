@@ -90,7 +90,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		if (this.robot.PRACTICEBOT) {
 			this.zero = 1874;
 		} else {
-			this.zero = 2050;
+			this.zero = -2063;
 		}
 
 		this.minus180 = this.zero - 2048;
@@ -120,12 +120,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.teleopInit();
 		// Close the hatch stuff
 		this.robot.secureHatchPanel();
-		if(this.robot.wrist.getSelectedSensorPosition() > 0){
-			neg = false;
-		}
-		else{
-			neg = true;
-		}
+		/*
+		 * if(this.robot.wrist.getSelectedSensorPosition() > 0){ neg = false; } else{
+		 * neg = true; }
+		 */
 	}
 
 	/**
@@ -218,10 +216,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void robotPeriodic() {
 		try {
 
-			if(this.robot.hatchPanelSecured){
+			if (this.robot.hatchPanelSecured) {
 				SmartDashboard.putString("Mittens", "Closed");
-			}
-			else{
+			} else {
 				SmartDashboard.putString("Mittens", "Open");
 			}
 
@@ -229,10 +226,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Left velocity", this.robot.leftDrive.getSelectedSensorVelocity());
 			SmartDashboard.putNumber("Right velocity", this.robot.rightDrive.getSelectedSensorVelocity());
 
-			//Zero
+			// Zero
 			SmartDashboard.putNumber("Zero", this.zero);
 
-			//Log Buttons
+			// Log Buttons
 			SmartDashboard.putBoolean("opA", this.robot.operator.getAButton());
 			SmartDashboard.putBoolean("opB", this.robot.operator.getBButton());
 			SmartDashboard.putBoolean("opX", this.robot.operator.getXButton());
@@ -244,7 +241,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("opRTr", this.robot.operator.getTriggerAxis(Hand.kRight));
 
 			SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
-
 
 			// Wrist stuff
 			SmartDashboard.putNumber("SetPoint", this.wristSetPoint);
@@ -301,11 +297,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void teleopPeriodic() {
 		try {
 
-			if(this.neg){
-				zero = -2050;
-			}
-			else{
-				zero = 2050;
+			if (this.neg) {
+				zero = -2063;
+			} else {
+				zero = 2063;
 			}
 			this.minus180 = this.zero - 2048;
 			this.straightUp = (this.zero + this.minus180) / 2;
@@ -332,15 +327,13 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// West coast drive with PID
-			if(this.robot.driver.getBumper(Hand.kLeft)){
+			if (this.robot.driver.getBumper(Hand.kLeft)) {
 				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT - this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + this.vis);
-			}
-			else if(this.robot.driver.getBumper(Hand.kRight)){
+			} else if (this.robot.driver.getBumper(Hand.kRight)) {
 				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT - this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + this.vis);
-			}
-			else {
+			} else {
 				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
 			}
@@ -376,8 +369,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.ballIn.get()) {
 				if (this.robot.operator.getTriggerAxis(Hand.kLeft) > .3) {
 					this.robot.leftOuttake.setPower(this.outtakePresetSpeed);
-				}
-				else if(this.robot.operator.getTriggerAxis(Hand.kRight) > .3){
+				} else if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
 					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
 				}
 				// if no input on op, set to 0
