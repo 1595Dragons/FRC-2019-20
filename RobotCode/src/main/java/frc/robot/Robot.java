@@ -120,6 +120,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.teleopInit();
 		// Close the hatch stuff
 		this.robot.secureHatchPanel();
+		if(this.robot.wrist.getSelectedSensorPosition() > 0){
+			neg = false;
+		}
+		else{
+			neg = true;
+		}
 	}
 
 	/**
@@ -212,33 +218,45 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void robotPeriodic() {
 		try {
 
+			if(this.robot.hatchPanelSecured){
+				SmartDashboard.putString("Mittens", "Closed");
+			}
+			else{
+				SmartDashboard.putString("Mittens", "Open");
+			}
+
 			// Drive train velocities
 			SmartDashboard.putNumber("Left velocity", this.robot.leftDrive.getSelectedSensorVelocity());
 			SmartDashboard.putNumber("Right velocity", this.robot.rightDrive.getSelectedSensorVelocity());
-			SmartDashboard.putNumber("Left Position", this.robot.leftDrive.getSelectedSensorPosition());
-			SmartDashboard.putNumber("Right Position", this.robot.rightDrive.getSelectedSensorPosition());
+
+			//Zero
 			SmartDashboard.putNumber("Zero", this.zero);
 
+			//Log Buttons
+			SmartDashboard.putBoolean("opA", this.robot.operator.getAButton());
+			SmartDashboard.putBoolean("opB", this.robot.operator.getBButton());
+			SmartDashboard.putBoolean("opX", this.robot.operator.getXButton());
+			SmartDashboard.putBoolean("opY", this.robot.operator.getYButton());
+			SmartDashboard.putNumber("opPOV", this.robot.operator.getPOV());
+			SmartDashboard.putBoolean("opLB", this.robot.operator.getBumper(Hand.kLeft));
+			SmartDashboard.putBoolean("oRLB", this.robot.operator.getBumper(Hand.kRight));
+			SmartDashboard.putNumber("opLTr", this.robot.operator.getTriggerAxis(Hand.kLeft));
+			SmartDashboard.putNumber("opRTr", this.robot.operator.getTriggerAxis(Hand.kRight));
+
+			SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
+
+
 			// Wrist stuff
-			SmartDashboard.putNumber("Error", this.robot.wrist.getClosedLoopError(0));
-			SmartDashboard.putNumber("Wrist Output", this.robot.wrist.getMotorOutputPercent());
-			SmartDashboard.putNumber("Wrist Velocity", this.robot.wrist.getSelectedSensorVelocity());
 			SmartDashboard.putNumber("SetPoint", this.wristSetPoint);
 			SmartDashboard.putNumber("Raw Wrist Position", this.robot.wrist.getPosition());
 			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)",
 					wristTickToAng(this.robot.wrist.getPosition() - this.straightUp));
-			SmartDashboard.putNumber("I Accumulation", this.robot.wrist.getIntegralAccumulator());
 			neg = SmartDashboard.getBoolean("neg", this.neg);
-;
 			// Ball?
 			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
 
 			// If the limelight stuff is not null, show its values
 			if (this.robot.limelight != null) {
-				SmartDashboard.putBoolean("Limelight target valid",
-						this.robot.limelight.getEntry("tv").getDouble(0) == 1 ? true : false);
-				SmartDashboard.putNumber("Limelight Horizontal Offset",
-						this.robot.limelight.getEntry("tx").getDouble(0));
 				SmartDashboard.putNumber("Limelight Vertical Offset", this.robot.limelight.getEntry("ty").getDouble(0));
 
 				if (this.isDisabled()) {
@@ -253,7 +271,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				// d = (h2-h1) / tan(a1+a2)
 				double distance = (28.5 - 11)
 						/ Math.tan(Math.toRadians(this.robot.limelight.getEntry("tx").getDouble(0)));
-				SmartDashboard.putNumber("Distance", distance);
 			}
 
 		} catch (Exception e) {
@@ -315,16 +332,17 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// West coast drive with PID
-			if (!this.robot.driver.getStickButton(Hand.kLeft)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
-				SmartDashboard.putNumber("lVel", (forward - turn) * .4 * this.maxVelDT);
-				SmartDashboard.putNumber("lerror", this.robot.leftDrive.getClosedLoopError());
-				SmartDashboard.putNumber("rVel", (forward + turn) * .4 * this.maxVelDT);
-				SmartDashboard.putNumber("rerror", this.robot.rightDrive.getClosedLoopError());
-			} else {
+			if(this.robot.driver.getBumper(Hand.kLeft)){
 				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT - this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + this.vis);
+			}
+			else if(this.robot.driver.getBumper(Hand.kRight)){
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT - this.vis);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + this.vis);
+			}
+			else {
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
 			}
 			if (forward == 0 && turn == 0) {
 				this.robot.leftDrive.set(ControlMode.Velocity, -this.vis);
@@ -356,10 +374,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Outtake stuff
 			// If the sensor sees nothing
 			if (this.robot.ballIn.get()) {
-				if (this.robot.operator.getTriggerAxis(Hand.kLeft) > .1
-						|| this.robot.operator.getTriggerAxis(Hand.kRight) > .1) {
-					this.robot.leftOuttake.setPower((this.robot.operator.getTriggerAxis(Hand.kLeft)
-							- this.robot.operator.getTriggerAxis(Hand.kRight)) * this.outtakePresetSpeed);
+				if (this.robot.operator.getTriggerAxis(Hand.kLeft) > .3) {
+					this.robot.leftOuttake.setPower(this.outtakePresetSpeed);
+				}
+				else if(this.robot.operator.getTriggerAxis(Hand.kRight) > .3){
+					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
 				}
 				// if no input on op, set to 0
 				else {
@@ -368,9 +387,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 			// if a ball is sensed only allow outtaking
 			else {
-				if (this.robot.operator.getTriggerAxis(Hand.kRight) > .1) {
-					this.robot.leftOuttake
-							.setPower((-this.robot.operator.getTriggerAxis(Hand.kRight)) * this.outtakePresetSpeed);
+				if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
+					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
 				}
 				// Stop
 				else {

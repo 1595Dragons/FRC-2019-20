@@ -203,11 +203,13 @@ public class RobotMap {
 		// try catch block)
 		try {
 			this.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
-			this.driverCam1.setFPS(7);
+			this.driverCam1.setFPS(10);
 			this.driverCam1.setResolution(320, 240);
 			this.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
-			this.driverCam2.setFPS(10);
+			this.driverCam2.setFPS(7);
 			this.driverCam2.setResolution(320, 240);
+			this.driverCam2.setExposureManual(75);
+			this.driverCam2.setBrightness(75);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
