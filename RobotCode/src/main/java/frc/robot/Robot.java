@@ -108,7 +108,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			zero = 1874;
 		}
 		else{
-			zero = 2040;
+			zero = -2050;
 		}
 		minus180 = zero-2048;
 		straightUp = (zero + minus180) / 2;
