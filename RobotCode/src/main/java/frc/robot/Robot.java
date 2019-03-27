@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
@@ -28,16 +29,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	private MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
 	private RobotMap robot = new RobotMap();
-
-	/**
-	 * Change the update frequency to 0.04 seconds (40 ms) in order silence the
-	 * watch dog...
-	 * 
-	 * Man that sounds bad :(
-	 */
-	public Robot() {
-		super(0.04d);
-	}
 
 	/**
 	 * Robot-wide initialization code should go here.
@@ -106,6 +97,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void disabledInit() {
+		Scheduler.getInstance().removeAll();
 	}
 
 	/**
