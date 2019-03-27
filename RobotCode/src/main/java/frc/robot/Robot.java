@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.Extenders;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
@@ -29,6 +30,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	private MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
 	private RobotMap robot = new RobotMap();
+
+	// Subsystems for command based programming
+	public static Extenders extender;
 
 	/**
 	 * Robot-wide initialization code should go here.
@@ -49,6 +53,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 		// Setup individual drive motor tests
 		this.robot.setupTestMode();
+
+		Robot.extender = new Extenders();
 
 		// PID for wrist
 		SmartDashboard.putNumber("kP", this.kP);
@@ -244,8 +250,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
 
 			// If the limelight stuff is not null, show its values
-			if (this.robot.limelight != null) {
-				SmartDashboard.putNumber("Limelight Vertical Offset", this.robot.limelight.getEntry("ty").getDouble(0));
+			if (RobotMap.limelight != null) {
+				SmartDashboard.putNumber("Limelight Vertical Offset", RobotMap.limelight.getEntry("ty").getDouble(0));
 
 				if (this.isDisabled()) {
 					boolean LEDs = SmartDashboard.getBoolean("LED", true);
@@ -399,19 +405,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// arbitrary feed forward accounts for gravity
-			this.arbFeedForward = -Math.sin(
-					wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
+			this.arbFeedForward = -Math
+					.sin(wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
 					* this.kG;
-				if(!this.manualOveride){
+			if (!this.manualOveride) {
 				this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
-					this.arbFeedForward);
-				}
-				else{
-					this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft);
-				}
-				if(this.robot.operator.getBButtonPressed()){
-					this.manualOveride = !manualOveride;
-				}
+						this.arbFeedForward);
+			} else {
+				this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
+			}
+			if (this.robot.operator.getBButtonPressed()) {
+				this.manualOveride = !manualOveride;
+			}
 
 			// Hatch mechanism
 			if (this.robot.operator.getAButtonPressed()) {

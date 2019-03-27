@@ -10,7 +10,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -33,33 +32,31 @@ public class RobotMap {
 	/**
 	 * Network table used by the limelight
 	 */
-	public NetworkTable limelight;
+	public static NetworkTable limelight;
 
 	/**
 	 * Practice robot ports
 	 */
-	private final int PracticeleftDrive1Port = 20, PracticeleftDrive2Port = 19, PracticeleftDrive3Port = 17,
+	private static final int PracticeleftDrive1Port = 20, PracticeleftDrive2Port = 19, PracticeleftDrive3Port = 17,
 			PracticerightDrive1Port = 24, PracticerightDrive2Port = 23, PracticerightDrive3Port = 21,
 			PracticewristPort = 22, PracticeleftOuttakePort = 13, PracticerightOuttakePort = 18;
 
 	/**
 	 * Real robot
 	 */
-	private final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 10,
+	private static final int leftDrive1Port = 5, leftDrive2Port = 6, leftDrive3Port = 7, rightDrive1Port = 10,
 			rightDrive2Port = 8, rightDrive3Port = 11, wristPort = 9, leftOuttakePort = 0, rightOuttakePort = 12;
 
-	// Get the Solenoid ports off of the PCM
-
 	/**
-	 * Practice Bot
+	 * Practice Bot solenoid ports
 	 */
-	private final int PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
+	private static final int PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
 			PracticeclamperPort2 = 5, Practicenothing1Port = 2, Practicenothing2Port = 7;
 
 	/**
-	 * Real Robot
+	 * Real Robot solenoid ports
 	 */
-	private final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7, nothing1Port = 4,
+	private static final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7, nothing1Port = 4,
 			nothing2Port = 0, ballInPort = 0, limeLightServoPort = 1;
 
 	private int currentlimit = 15;
@@ -78,7 +75,7 @@ public class RobotMap {
 	 * in order to encourage the use of the functions in this class. Also dont
 	 * initalize them.
 	 */
-	private DoubleSolenoid extender, clamper;
+	public static DoubleSolenoid extender, clamper;
 	public Solenoid nothing1, nothing2;
 
 	/**
@@ -88,12 +85,14 @@ public class RobotMap {
 	 */
 	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
 
-	public DigitalInput ballIn;
-	public Servo limeLightServo;
+	public static DigitalInput ballIn;
+
 	/**
 	 * Setup the controllers for the drivers.
 	 */
-	public final XboxController driver = new XboxController(0), operator = new XboxController(1);
+	public final XboxController driver = new XboxController(0);
+	@Deprecated
+	public final XboxController operator = new XboxController(1);
 
 	/**
 	 * Create the object for the driver camera, as well as the vision camera (if one
@@ -102,11 +101,12 @@ public class RobotMap {
 	 * Also, the stream produced by the camera can be viewed at:
 	 * {@link https://roborio-1595-frc.local:1181/?action=stream}
 	 */
-	public edu.wpi.cscore.UsbCamera driverCam1, driverCam2;
+	public static edu.wpi.cscore.UsbCamera driverCam1, driverCam2;
 
 	/**
 	 * Declare a private global boolean for the hatch panel mechanism functions.
 	 */
+	@Deprecated
 	public boolean hatchPanelSecured = false, hatchMechDeployed = false, popped = false;
 
 	/**
@@ -128,35 +128,35 @@ public class RobotMap {
 		// Apply port addresses to the robot, based on whether or not it is the practice
 		// bot.
 		if (this.PRACTICEBOT) {
-			this.leftDrive = new Motor(this.PracticeleftDrive1Port);
-			this.leftDrive2 = new Motor(this.PracticeleftDrive2Port);
-			this.leftDrive3 = new Motor(this.PracticeleftDrive3Port);
-			this.rightDrive = new Motor(this.PracticerightDrive1Port);
-			this.rightDrive2 = new Motor(this.PracticerightDrive2Port);
-			this.rightDrive3 = new Motor(this.PracticerightDrive3Port);
-			this.wrist = new Motor(this.PracticewristPort);
-			this.leftOuttake = new Motor(this.PracticeleftOuttakePort);
-			this.rightOuttake = new Motor(this.PracticerightOuttakePort);
+			this.leftDrive = new Motor(RobotMap.PracticeleftDrive1Port);
+			this.leftDrive2 = new Motor(RobotMap.PracticeleftDrive2Port);
+			this.leftDrive3 = new Motor(RobotMap.PracticeleftDrive3Port);
+			this.rightDrive = new Motor(RobotMap.PracticerightDrive1Port);
+			this.rightDrive2 = new Motor(RobotMap.PracticerightDrive2Port);
+			this.rightDrive3 = new Motor(RobotMap.PracticerightDrive3Port);
+			this.wrist = new Motor(RobotMap.PracticewristPort);
+			this.leftOuttake = new Motor(RobotMap.PracticeleftOuttakePort);
+			this.rightOuttake = new Motor(RobotMap.PracticerightOuttakePort);
 
-			this.extender = new DoubleSolenoid(this.PracticeextenderPort1, this.PracticeextenderPort2);
-			this.clamper = new DoubleSolenoid(this.PracticeclamperPort1, this.PracticeclamperPort2);
-			this.nothing1 = new Solenoid(this.Practicenothing1Port);
-			this.nothing2 = new Solenoid(this.Practicenothing2Port);
+			RobotMap.extender = new DoubleSolenoid(RobotMap.PracticeextenderPort1, RobotMap.PracticeextenderPort2);
+			RobotMap.clamper = new DoubleSolenoid(RobotMap.PracticeclamperPort1, RobotMap.PracticeclamperPort2);
+			this.nothing1 = new Solenoid(RobotMap.Practicenothing1Port);
+			this.nothing2 = new Solenoid(RobotMap.Practicenothing2Port);
 		} else {
-			this.leftDrive = new Motor(this.leftDrive1Port);
-			this.leftDrive2 = new Motor(this.leftDrive2Port);
-			this.leftDrive3 = new Motor(this.leftDrive3Port);
-			this.rightDrive = new Motor(this.rightDrive1Port);
-			this.rightDrive2 = new Motor(this.rightDrive2Port);
-			this.rightDrive3 = new Motor(this.rightDrive3Port);
-			this.wrist = new Motor(this.wristPort);
-			this.leftOuttake = new Motor(this.leftOuttakePort);
-			this.rightOuttake = new Motor(this.rightOuttakePort);
+			this.leftDrive = new Motor(RobotMap.leftDrive1Port);
+			this.leftDrive2 = new Motor(RobotMap.leftDrive2Port);
+			this.leftDrive3 = new Motor(RobotMap.leftDrive3Port);
+			this.rightDrive = new Motor(RobotMap.rightDrive1Port);
+			this.rightDrive2 = new Motor(RobotMap.rightDrive2Port);
+			this.rightDrive3 = new Motor(RobotMap.rightDrive3Port);
+			this.wrist = new Motor(RobotMap.wristPort);
+			this.leftOuttake = new Motor(RobotMap.leftOuttakePort);
+			this.rightOuttake = new Motor(RobotMap.rightOuttakePort);
 
-			this.extender = new DoubleSolenoid(this.extenderPort1, this.extenderPort2);
-			this.clamper = new DoubleSolenoid(this.clamperPort1, this.clamperPort2);
-			this.nothing1 = new Solenoid(this.nothing1Port);
-			this.nothing2 = new Solenoid(this.nothing2Port);
+			RobotMap.extender = new DoubleSolenoid(RobotMap.extenderPort1, RobotMap.extenderPort2);
+			RobotMap.clamper = new DoubleSolenoid(RobotMap.clamperPort1, RobotMap.clamperPort2);
+			this.nothing1 = new Solenoid(RobotMap.nothing1Port);
+			this.nothing2 = new Solenoid(RobotMap.nothing2Port);
 		}
 
 		// Setup limelight (only on comp robot)
@@ -167,8 +167,7 @@ public class RobotMap {
 		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
-		this.ballIn = new DigitalInput(ballInPort);
-		this.limeLightServo = new Servo(limeLightServoPort);
+		RobotMap.ballIn = new DigitalInput(ballInPort);
 
 		// Set the secondary motors to follow the first ones
 		this.leftDrive2.set(ControlMode.Follower, this.leftDrive.getDeviceID());
@@ -206,16 +205,16 @@ public class RobotMap {
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
 		try {
-			this.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
-			this.driverCam1.setFPS(3);
-			this.driverCam1.setResolution(320/2, 240/2);
-			this.driverCam1.setExposureManual(40);
-			this.driverCam1.setBrightness(40);
-			this.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
-			this.driverCam2.setFPS(15);
-			this.driverCam2.setResolution(320, 240);
-			this.driverCam2.setExposureManual(75);
-			this.driverCam2.setBrightness(75);
+			RobotMap.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
+			RobotMap.driverCam1.setFPS(3);
+			RobotMap.driverCam1.setResolution(320 / 2, 240 / 2);
+			RobotMap.driverCam1.setExposureManual(40);
+			RobotMap.driverCam1.setBrightness(40);
+			RobotMap.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
+			RobotMap.driverCam2.setFPS(15);
+			RobotMap.driverCam2.setResolution(320, 240);
+			RobotMap.driverCam2.setExposureManual(75);
+			RobotMap.driverCam2.setBrightness(75);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -224,6 +223,7 @@ public class RobotMap {
 	/**
 	 * Releases the hatch panel. (Opens the hatch mechanism).
 	 */
+	@Deprecated
 	public void releaseHatchPanel() {
 		this.clamper.set(Value.kReverse);
 		this.hatchPanelSecured = false;
@@ -232,6 +232,7 @@ public class RobotMap {
 	/**
 	 * Secures the hatch panel. (Closes the hatch mechanism).
 	 */
+	@Deprecated
 	public void secureHatchPanel() {
 		this.clamper.set(Value.kForward);
 		this.hatchPanelSecured = true;
@@ -240,6 +241,7 @@ public class RobotMap {
 	/**
 	 * Deploys the hatch mech.
 	 */
+	@Deprecated
 	public void extendHatch() {
 		this.extender.set(Value.kForward);
 		this.hatchMechDeployed = true;
@@ -248,6 +250,7 @@ public class RobotMap {
 	/**
 	 * Retracts the hatch mech.
 	 */
+	@Deprecated
 	public void retracthHatch() {
 		this.extender.set(Value.kReverse);
 		this.hatchMechDeployed = false;
@@ -257,6 +260,7 @@ public class RobotMap {
 	 * Toggles the hatch panel mechanism. Either releasing or securing the hatch
 	 * panel.
 	 */
+	@Deprecated
 	public void toggleHatchMechanism() {
 		if (this.hatchPanelSecured) {
 			this.releaseHatchPanel();
@@ -268,6 +272,7 @@ public class RobotMap {
 	/**
 	 * Toggles the hatch extension mechanism.
 	 */
+	@Deprecated
 	public void toggleHatchExtension() {
 		if (this.hatchMechDeployed) {
 			this.retracthHatch();
