@@ -5,12 +5,14 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
@@ -22,11 +24,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
  * @author Stephen - FRC 1595
  */
 public class RobotMap {
-	
+
 	/**
 	 * Create a boolean to check if this is the practice robot
 	 */
 	public boolean PRACTICEBOT = false;
+
+	/**
+	 * Network table used by the limelight
+	 */
+	public NetworkTable limelight;
 
 	/**
 	 * Practice robot ports
@@ -43,18 +50,19 @@ public class RobotMap {
 
 	// Get the Solenoid ports off of the PCM
 
-	// Practice Bot
-	private final int PracticeextenderPort1 = 1,PracticeextenderPort2 = 4, PracticeclamperPort1 = 0, PracticeclamperPort2 = 5;
-	private final int Practicenothing1Port = 2, Practicenothing2Port = 7;
+	/**
+	 * Practice Bot
+	 */
+	private final int PracticeextenderPort1 = 1, PracticeextenderPort2 = 4, PracticeclamperPort1 = 0,
+			PracticeclamperPort2 = 5, Practicenothing1Port = 2, Practicenothing2Port = 7;
 
+	/**
+	 * Real Robot
+	 */
+	private final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7, nothing1Port = 4,
+			nothing2Port = 0, ballInPort = 0, limeLightServoPort = 1;
 
-	// Real Robot
-	private final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7; // TODO: Find correct ports
-	private final int nothing1Port = 4, nothing2Port = 0;
-
-	private final int ballInPort = 0, limeLightServoPort = 1;
-	
-	private int currentlimit = 10;
+	private int currentlimit = 15;
 
 	/**
 	 * Declare the motors that will be used on the robot and will be used by other
@@ -99,7 +107,7 @@ public class RobotMap {
 	/**
 	 * Declare a private global boolean for the hatch panel mechanism functions.
 	 */
-	private boolean hatchPanelSecured = false, hatchMechDeployed = false, popped = false;
+	public boolean hatchPanelSecured = false, hatchMechDeployed = false, popped = false;
 
 	/**
 	 * Declare a chooser (radio buttons on SmartDashboard) that will be used for
@@ -129,6 +137,11 @@ public class RobotMap {
 			this.wrist = new Motor(this.PracticewristPort);
 			this.leftOuttake = new Motor(this.PracticeleftOuttakePort);
 			this.rightOuttake = new Motor(this.PracticerightOuttakePort);
+
+			this.extender = new DoubleSolenoid(this.PracticeextenderPort1, this.PracticeextenderPort2);
+			this.clamper = new DoubleSolenoid(this.PracticeclamperPort1, this.PracticeclamperPort2);
+			this.nothing1 = new Solenoid(this.Practicenothing1Port);
+			this.nothing2 = new Solenoid(this.Practicenothing2Port);
 		} else {
 			this.leftDrive = new Motor(this.leftDrive1Port);
 			this.leftDrive2 = new Motor(this.leftDrive2Port);
@@ -139,19 +152,16 @@ public class RobotMap {
 			this.wrist = new Motor(this.wristPort);
 			this.leftOuttake = new Motor(this.leftOuttakePort);
 			this.rightOuttake = new Motor(this.rightOuttakePort);
+
+			this.extender = new DoubleSolenoid(this.extenderPort1, this.extenderPort2);
+			this.clamper = new DoubleSolenoid(this.clamperPort1, this.clamperPort2);
+			this.nothing1 = new Solenoid(this.nothing1Port);
+			this.nothing2 = new Solenoid(this.nothing2Port);
 		}
 
-		if (this.PRACTICEBOT == false) {
-			this.extender = new DoubleSolenoid(extenderPort1, extenderPort2);
-			this.clamper = new DoubleSolenoid(clamperPort1, clamperPort2);
-			this.nothing1 = new Solenoid(nothing1Port);
-			this.nothing2 = new Solenoid(nothing2Port);
-		} else {
-			this.extender = new DoubleSolenoid(PracticeextenderPort1, PracticeextenderPort2);
-			this.clamper = new DoubleSolenoid(PracticeclamperPort1, PracticeclamperPort2);
-			this.nothing1 = new Solenoid(Practicenothing1Port);
-			this.nothing2 = new Solenoid(Practicenothing2Port);
-		}
+		// Setup limelight (only on comp robot)
+		this.limelight = NetworkTableInstance.getDefault().getTable("limelight");
+
 		// Setup encoders
 		this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
@@ -185,19 +195,27 @@ public class RobotMap {
 		this.wrist.setSensorPhase(true);
 
 		// Config current limit
-		this.leftDrive.configContinuousCurrentLimit(currentlimit, 25);
-		this.rightDrive.configContinuousCurrentLimit(currentlimit, 25);
-		this.wrist.configContinuousCurrentLimit(currentlimit, 25);
+		this.leftDrive.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive.configContinuousCurrentLimit(this.currentlimit);
+		this.leftDrive2.configContinuousCurrentLimit(this.currentlimit);
+		this.leftDrive3.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive2.configContinuousCurrentLimit(this.currentlimit);
+		this.rightDrive3.configContinuousCurrentLimit(this.currentlimit);
+		this.wrist.configContinuousCurrentLimit(10);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)
 		try {
 			this.driverCam1 = CameraServer.getInstance().startAutomaticCapture(0);
-			this.driverCam1.setFPS(7);
-			this.driverCam1.setResolution(320, 240);
+			this.driverCam1.setFPS(3);
+			this.driverCam1.setResolution(320/2, 240/2);
+			this.driverCam1.setExposureManual(40);
+			this.driverCam1.setBrightness(40);
 			this.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
-			this.driverCam2.setFPS(10);
+			this.driverCam2.setFPS(15);
 			this.driverCam2.setResolution(320, 240);
+			this.driverCam2.setExposureManual(75);
+			this.driverCam2.setBrightness(75);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -293,6 +311,24 @@ public class RobotMap {
 		} else {
 			this.chooser.getSelected().stop();
 		}
+	}
+
+	/**
+	 * Turns on the limelight LEDs, blinding all in its path.
+	 * 
+	 * Mostly Tristan.
+	 * 
+	 * It just blinds Tristan.
+	 */
+	public void enableLimelightLEDs() {
+		this.limelight.getEntry("ledMode").setNumber(3);
+	}
+
+	/**
+	 * Turns iff the limelight LEDs.
+	 */
+	public void disableLimelightLEDs() {
+		this.limelight.getEntry("ledMode").setNumber(1);
 	}
 
 }
