@@ -54,7 +54,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		// Setup individual drive motor tests
 		this.robot.setupTestMode();
 
-		Robot.extender = new Extenders();
+		Robot.extender = new Extenders("Extender");
+
+		SmartDashboard.putData(Scheduler.getInstance());
 
 		// PID for wrist
 		SmartDashboard.putNumber("kP", this.kP);
@@ -213,7 +215,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	@Override
 	public void robotPeriodic() {
 		try {
-
+			Scheduler.getInstance().run();
 			if (this.robot.hatchPanelSecured) {
 				SmartDashboard.putString("Mittens", "Closed");
 			} else {
@@ -405,8 +407,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// arbitrary feed forward accounts for gravity
-			this.arbFeedForward = -Math
-					.sin(wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
+			this.arbFeedForward = -Math.sin(
+					wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
 					* this.kG;
 			if (!this.manualOveride) {
 				this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
@@ -421,12 +423,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Hatch mechanism
 			if (this.robot.operator.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
-			}
-			if (this.robot.operator.getBButton()) {
-
-			}
-			if (this.robot.operator.getXButtonPressed()) {
-				this.robot.toggleHatchExtension();
 			}
 
 			if (this.robot.limelight != null) {

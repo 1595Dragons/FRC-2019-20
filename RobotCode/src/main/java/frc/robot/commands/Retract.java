@@ -5,23 +5,21 @@ import frc.robot.Robot;
 
 public class Retract extends Command {
 
-    public static boolean isRetracted = false;
+	public Retract() {
+		this.requires(Robot.extender);
+		this.setTimeout(0.75d);
+	}
 
-    public Retract() {
-        this.requires(Robot.extender);
-        this.setTimeout(0.75d);
-    }
+	@Override
+	protected boolean isFinished() {
+		return this.isTimedOut();
+	}
 
-    @Override
-    protected boolean isFinished() {
-        return this.isTimedOut();
-    }
+	protected void initialize() {
+		Robot.extender.retract();
+	}
 
-    protected void initialize() {
-        Robot.extender.retract();
-    }
-
-    protected void execute() {
-        // Do nothing for now
-    }
+	protected void execute() {
+		// Do nothing for now
+	}
 }

@@ -4,35 +4,43 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.RobotMap;
-import frc.robot.commands.Extend;
-import frc.robot.commands.Retract;
 
 public class Extenders extends Subsystem {
 
-    DoubleSolenoid extender = RobotMap.extender;
+	private final DoubleSolenoid extender = RobotMap.extender;
 
-    @Override
-    protected void initDefaultCommand() {
-    }
+	public static boolean isExtended = true;  
 
-    public void extend() {
-        this.extender.set(Value.kForward);
-        Extend.isExtended = true;
-        Retract.isRetracted = false;
-    }
+	public Extenders() {
+		// Constructor with a fixed name
+		super("Extender");
+	}
 
-    public void retract() {
-        this.extender.set(Value.kReverse);
-        Extend.isExtended = false;
-        Retract.isRetracted = true;
-    }
+	public Extenders(String name) {
+		// Constructor with a dynamic name
+		super(name);
+	}
 
-    public void toggle() {
-        if (Retract.isRetracted) {
-            this.extend();
-        } else {
-            this.retract();
-        }
-    }
+	@Override
+	protected void initDefaultCommand() {
+	}
+
+	public void extend() {
+		this.extender.set(Value.kForward);
+		Extenders.isExtended = true;
+	}
+
+	public void retract() {
+		this.extender.set(Value.kReverse);
+		Extenders.isExtended = false;
+	}
+
+	public void toggle() {
+		if (Extenders.isExtended) {
+			this.retract();
+		} else {
+			this.extend();
+		}
+	}
 
 }
