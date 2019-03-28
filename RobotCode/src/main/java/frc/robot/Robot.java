@@ -19,10 +19,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	private boolean neg = true, manualOveride = false, m_LimelightHasValidTarget = false, manualWrist = false, visEnabled;
 	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, DTkP = 5,
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0,
-			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 200, zero,
+			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 300, zero,
 			minus180, straightUp, m_LimelightDriveCommand = 0, m_LimelightSteerCommand = 0;
 
-	double STEER_K = 5, DRIVE_K = 5, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
+	double STEER_K = 3, DRIVE_K = 0, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
+
+	int counter = 0;
 	
 	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 25;
 
@@ -87,7 +89,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putBoolean("LED", true);
 		}
 		if (this.robot.PRACTICEBOT) {
-			this.zero = -5123;
+			this.zero = 2241;
 		} else {
 			this.zero = -2063;
 		}
@@ -322,7 +324,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			
 			if(visEnabled){
 				visLeft = -m_LimelightSteerCommand + m_LimelightDriveCommand;
-				visRight = m_LimelightDriveCommand + m_LimelightDriveCommand;
+				visRight = m_LimelightSteerCommand + m_LimelightDriveCommand;
 			}
 			else{
 				visLeft = 0;
@@ -359,8 +361,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}*/
 
 			// Vision?
-			if (this.robot.driver.getAButtonPressed()) {
-				this.visEnabled = !this.visEnabled;
+			if (this.robot.driver.getAButton()) {
+				this.visEnabled = true;
+			}
+			else{
+				this.visEnabled = false;
 			}
 			SmartDashboard.putBoolean("Vision Enabled", this.visEnabled);
 
@@ -425,8 +430,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (this.robot.operator.getAButtonPressed()) {
 				this.robot.toggleHatchMechanism();
 			}
-			if (this.robot.operator.getBButton()) {
-
+			if(counter % 100 == 0){
+				robot.wrist.setSelectedSensorPosition((int) this.convert0To4096(this.robot.wrist.getSelectedSensorPosition()));
 			}
 			if (this.robot.operator.getXButtonPressed()) {
 				this.robot.toggleHatchExtension();
@@ -439,6 +444,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 					this.robot.enableLimelightLEDs();
 				}
 			}
+
+			counter ++;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -490,6 +497,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				a -= 360;
 			} else if (a < -180) {
 				a += 360;
+			}
+		}
+		return a;
+	}
+
+	public double convert0To4096(double x) {
+		double a = x;
+		while (a > 4096 || a < 0) {
+			if (a > 4096) {
+				a -= 4096;
+			} else if (a < 0) {
+				a += 4096;
 			}
 		}
 		return a;
