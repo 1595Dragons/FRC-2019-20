@@ -16,16 +16,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
-	private boolean neg = true, manualOveride = false, visEnabled = false, manualWrist = false;
-
-	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, viskP = 4, viskI = 0.01, viskD = 0, DTkP = 5,
-			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
+	private boolean neg = true, manualOveride = false, m_LimelightHasValidTarget = false, manualWrist = false, visEnabled;
+	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, DTkP = 5,
+			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0,
 			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 200, zero,
-			minus180, straightUp;
+			minus180, straightUp, m_LimelightDriveCommand = 0, m_LimelightSteerCommand = 0;
 
+	double STEER_K = 5, DRIVE_K = 5, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
+	
 	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 25;
-
-	private MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
 	private RobotMap robot = new RobotMap();
 
@@ -60,10 +59,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.setupTestMode();
 
 		// PID for wrist
+		SmartDashboard.putNumber("STEER_K", this.STEER_K);
+		SmartDashboard.putNumber("DRIVE_K", this.DRIVE_K);
+		SmartDashboard.putNumber("DESIRED_TARGET_AREA", this.DESIRED_TARGET_AREA);
+		SmartDashboard.putNumber("MAX_DRIVE", this.MAX_DRIVE);
 		SmartDashboard.putNumber("kP", this.kP);
-		SmartDashboard.putNumber("viskP", this.viskP);
-		SmartDashboard.putNumber("viskI", this.viskI);
-		SmartDashboard.putNumber("viskD", this.viskD);
 		SmartDashboard.putNumber("kI", this.kI);
 		SmartDashboard.putNumber("kD", this.kD);
 		SmartDashboard.putNumber("kF", this.kF);
@@ -86,16 +86,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		if (this.robot.limelight != null) {
 			SmartDashboard.putBoolean("LED", true);
 		}
-<<<<<<< HEAD
-		else{
-			zero = -2050;
-=======
-
 		if (this.robot.PRACTICEBOT) {
-			this.zero = 1874;
+			this.zero = -5123;
 		} else {
 			this.zero = -2063;
->>>>>>> 3b70faa87db2ec6fdc3d901bc957edaf9368085f
 		}
 
 		this.minus180 = this.zero - 2048;
@@ -140,6 +134,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
+		double encoderSign = Math.abs(this.robot.wrist.getSelectedSensorPosition()) / this.robot.wrist.getSelectedSensorPosition();
+
 		this.robot.nothing1.set(true);
 		this.robot.nothing2.set(true);
 
@@ -149,20 +145,16 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.wrist.configForwardSoftLimitEnable(true);
 		this.robot.wrist.configReverseSoftLimitEnable(true);
 
-		// Limelight pid
-		this.viskP = SmartDashboard.getNumber("viskP", this.viskP);
-		this.viskI = SmartDashboard.getNumber("viskI", this.viskI);
-		this.viskD = SmartDashboard.getNumber("viskD", this.viskD);
-		this.pid.setP(this.viskP);
-		this.pid.setI(this.viskI);
-		this.pid.setD(this.viskD);
-
 		// PIDF && Motion Profile constants / configs for the wrist
 		this.kP = SmartDashboard.getNumber("kP", this.kP);
 		this.kI = SmartDashboard.getNumber("kI", this.kI);
 		this.kD = SmartDashboard.getNumber("kD", this.kD);
 		this.kF = SmartDashboard.getNumber("kF", this.kF);
 		this.kG = SmartDashboard.getNumber("kG", this.kG);
+		this.STEER_K = SmartDashboard.getNumber("STEER_K", this.STEER_K);
+		this.DRIVE_K = SmartDashboard.getNumber("DRIVE_K", this.DRIVE_K);
+		this.DESIRED_TARGET_AREA = SmartDashboard.getNumber("DESIRED_TARGET_AREA", this.DESIRED_TARGET_AREA);
+		this.MAX_DRIVE = SmartDashboard.getNumber("MAX_DRIVE", this.MAX_DRIVE);
 		this.iZone = (int) SmartDashboard.getNumber("iZone", this.iZone);
 		this.cruiseVel = (int) SmartDashboard.getNumber("Cruise Vel", this.cruiseVel);
 		this.maxAccel = (int) SmartDashboard.getNumber("Max Accel", this.maxAccel);
@@ -234,6 +226,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Zero
 			SmartDashboard.putNumber("Zero", this.zero);
 
+
+			SmartDashboard.putNumber("ty", robot.limelight.getEntry("ty").getDouble(0));
+
 			// Log Buttons
 			SmartDashboard.putBoolean("opA", this.robot.operator.getAButton());
 			SmartDashboard.putBoolean("opB", this.robot.operator.getBButton());
@@ -302,24 +297,13 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void teleopPeriodic() {
 		try {
 
-			if (this.neg) {
+			/*if (this.neg) {
 				zero = -2063;
 			} else {
 				zero = 2063;
 			}
 			this.minus180 = this.zero - 2048;
-			this.straightUp = (this.zero + this.minus180) / 2;
-
-			// Limelight stuff
-			this.pid.setSetpoint(this.visSetpoint);
-			if (this.wristSetPoint == zero || this.robot.limelight.getEntry("tv").getDouble(0) != 1) {
-				this.visEnabled = false;
-			}
-			if (this.visEnabled) {
-				this.vis = this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0));
-			} else {
-				this.vis = 0;
-			}
+			this.straightUp = (this.zero + this.minus180) / 2;*/
 
 			// Calculate drive power
 			double forward = Math.pow(this.robot.driver.getY(Hand.kLeft), 1) * .8,
@@ -330,25 +314,37 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (Math.abs(turn) < 0.2d) {
 				turn = 0;
 			}
+			Update_Limelight_Tracking();
 
 			// West coast drive with PID
+			double visLeft;
+			double visRight;
+			
+			if(visEnabled){
+				visLeft = -m_LimelightSteerCommand + m_LimelightDriveCommand;
+				visRight = m_LimelightDriveCommand + m_LimelightDriveCommand;
+			}
+			else{
+				visLeft = 0;
+				visRight = 0;
+			}
 			if (this.robot.driver.getBumper(Hand.kLeft)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + this.vis);
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT + visLeft);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + visRight);
 			} else if (this.robot.driver.getBumper(Hand.kRight)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + this.vis);
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT + visLeft);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + visRight);
 			} else {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
+				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT + visLeft);
+				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + visRight);
 			}
 			if (forward == 0 && turn == 0) {
-				this.robot.leftDrive.set(ControlMode.Velocity, -this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, +this.vis);
+				this.robot.leftDrive.set(ControlMode.Velocity, + visLeft);
+				this.robot.rightDrive.set(ControlMode.Velocity, + visRight);
 			}
 
 			// Controller vibration
-			if (Math.abs(this.robot.limelight.getEntry("ty").getDouble(0) - this.visSetpoint) < 1 && this.visEnabled) {
+			/*if (Math.abs(this.robot.limelight.getEntry("ty").getDouble(0) - this.visSetpoint) < 1 && this.visEnabled) {
 				this.robot.driver.setRumble(RumbleType.kLeftRumble, .1);
 				this.robot.driver.setRumble(RumbleType.kRightRumble, .1);
 
@@ -360,14 +356,13 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				this.robot.driver.setRumble(RumbleType.kRightRumble, 0);
 				this.robot.operator.setRumble(RumbleType.kLeftRumble, 0);
 				this.robot.operator.setRumble(RumbleType.kRightRumble, 0);
-			}
+			}*/
 
 			// Vision?
 			if (this.robot.driver.getAButtonPressed()) {
 				this.visEnabled = !this.visEnabled;
 			}
 			SmartDashboard.putBoolean("Vision Enabled", this.visEnabled);
-			SmartDashboard.putNumber("Vision Output", this.vis);
 
 			// Outtake stuff
 			// If the sensor sees nothing
@@ -415,16 +410,16 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			this.arbFeedForward = -Math.sin(
 					wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
 					* this.kG;
-				if(!this.manualOveride){
+				//if(!this.manualOveride){
 				this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
 					this.arbFeedForward);
-				}
+				/*}
 				else{
 					this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft);
 				}
 				if(this.robot.operator.getBButtonPressed()){
 					this.manualOveride = !manualOveride;
-				}
+				}*/
 
 			// Hatch mechanism
 			if (this.robot.operator.getAButtonPressed()) {
@@ -448,6 +443,44 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void Update_Limelight_Tracking()
+	{
+		  // These numbers must be tuned for your Robot!  Be careful!
+		  // how hard to turn toward the target
+  		  // how hard to drive fwd toward the target
+		  // Area of the target when the robot reaches the wall
+		  // Simple speed limit so we don't drive too fast
+	
+		  double tv = robot.limelight.getEntry("tv").getDouble(0);
+		  double tx = robot.limelight.getEntry("tx").getDouble(0);
+		  double ty = robot.limelight.getEntry("ty").getDouble(0);
+		  double ta = robot.limelight.getEntry("ta").getDouble(0);
+  
+		  if (tv < 1.0)
+		  {
+			m_LimelightHasValidTarget = false;
+			m_LimelightDriveCommand = 0.0;
+			m_LimelightSteerCommand = 0.0;
+			return;
+		  }
+  
+		  m_LimelightHasValidTarget = true;
+  
+		  // Start with proportional steering
+		  double steer_cmd = tx * STEER_K;
+		  m_LimelightSteerCommand = steer_cmd;
+  
+		  // try to drive forward until the target area reaches our desired area
+		  double drive_cmd = (ty) * DRIVE_K;
+  
+		  // don't let the robot drive too fast into the goal
+		  if (drive_cmd > MAX_DRIVE)
+		  {
+			drive_cmd = MAX_DRIVE;
+		  }
+		  m_LimelightDriveCommand = drive_cmd;
 	}
 
 	public double convertMinus180To180(double theta) {
