@@ -122,12 +122,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	@Override
 	public void autonomousInit() {
 		this.teleopInit();
+
 		// Close the hatch stuff
-		this.robot.secureHatchPanel();
-		/*
-		 * if(this.robot.wrist.getSelectedSensorPosition() > 0){ neg = false; } else{
-		 * neg = true; }
-		 */
+		Robot.mitten.secure();
 	}
 
 	/**
@@ -194,12 +191,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 		// Outtake speed limit
 		this.outtakePresetSpeed = SmartDashboard.getNumber("Outtake Preset Speed", this.outtakePresetSpeed);
-
-		if (this.robot.hatchPanelSecured) {
-			this.robot.secureHatchPanel();
-		} else {
-			this.robot.releaseHatchPanel();
-		}
 	}
 
 	/**
@@ -220,11 +211,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public void robotPeriodic() {
 		try {
 			Scheduler.getInstance().run();
-			if (this.robot.hatchPanelSecured) {
-				SmartDashboard.putString("Mittens", "Closed");
-			} else {
-				SmartDashboard.putString("Mittens", "Open");
-			}
 
 			// Drive train velocities
 			SmartDashboard.putNumber("Left velocity", this.robot.leftDrive.getSelectedSensorVelocity());
@@ -422,11 +408,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 			if (this.robot.operator.getBButtonPressed()) {
 				this.manualOveride = !manualOveride;
-			}
-
-			// Hatch mechanism
-			if (this.robot.operator.getAButtonPressed()) {
-				this.robot.toggleHatchMechanism();
 			}
 
 			if (this.robot.limelight != null) {
