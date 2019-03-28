@@ -1,11 +1,11 @@
-package frc.robot.commands;
+package frc.robot.commands.extender;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 
-public class Retract extends Command {
+public class Extend extends Command {
 
-	public Retract() {
+	public Extend() {
 		this.requires(Robot.extender);
 		this.setTimeout(0.75d);
 	}
@@ -16,7 +16,7 @@ public class Retract extends Command {
 	}
 
 	protected void initialize() {
-		Robot.extender.retract();
+		Robot.extender.extend();
 	}
 
 	protected void execute() {

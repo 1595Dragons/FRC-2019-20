@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Extenders;
+import frc.robot.subsystems.Mittens;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
@@ -33,6 +34,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 	// Subsystems for command based programming
 	public static Extenders extender;
+	public static Mittens mitten;
 
 	/**
 	 * Robot-wide initialization code should go here.
@@ -55,6 +57,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.setupTestMode();
 
 		Robot.extender = new Extenders("Extender");
+
+		Robot.mitten = new Mittens("Mitten");
 
 		SmartDashboard.putData(Scheduler.getInstance());
 

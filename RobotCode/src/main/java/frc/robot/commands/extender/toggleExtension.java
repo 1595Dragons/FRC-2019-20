@@ -1,11 +1,12 @@
-package frc.robot.commands;
+package frc.robot.commands.extender;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import frc.robot.subsystems.Extenders;
 
-public class Extend extends Command {
+public class toggleExtension extends Command {
 
-	public Extend() {
+	public toggleExtension() {
 		this.requires(Robot.extender);
 		this.setTimeout(0.75d);
 	}
@@ -16,7 +17,11 @@ public class Extend extends Command {
 	}
 
 	protected void initialize() {
-		Robot.extender.extend();
+		if (Extenders.isExtended) {
+			Robot.extender.extend();
+		} else {
+			Robot.extender.retract();
+		}
 	}
 
 	protected void execute() {

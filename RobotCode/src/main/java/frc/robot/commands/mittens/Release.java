@@ -3,9 +3,9 @@ package frc.robot.commands.mittens;
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 
-public class Secure extends Command {
+public class Release extends Command {
 
-    public Secure() {
+    public Release() {
         this.requires(Robot.mitten);
         this.setTimeout(0.25d);
     }
@@ -16,11 +16,11 @@ public class Secure extends Command {
     }
 
     protected void initialize() {
-        Robot.mitten.secure();
-    }
+		Robot.mitten.release();
+	}
 
-    protected void execute() {
-        // Do nothing for now
-    }
+	protected void execute() {
+		// Do nothing for now
+	}
 
 }

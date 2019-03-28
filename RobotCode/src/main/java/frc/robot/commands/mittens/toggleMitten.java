@@ -2,10 +2,11 @@ package frc.robot.commands.mittens;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import frc.robot.subsystems.Mittens;
 
-public class Secure extends Command {
+public class toggleMitten extends Command {
 
-    public Secure() {
+    public toggleMitten() {
         this.requires(Robot.mitten);
         this.setTimeout(0.25d);
     }
@@ -16,11 +17,15 @@ public class Secure extends Command {
     }
 
     protected void initialize() {
-        Robot.mitten.secure();
-    }
+		if (Mittens.isSecured) {
+			Robot.mitten.release();
+		} else {
+			Robot.mitten.secure();
+		}
+	}
 
-    protected void execute() {
-        // Do nothing for now
-    }
+	protected void execute() {
+		// Do nothing for now
+	}
 
 }
