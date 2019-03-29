@@ -22,7 +22,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 300, zero,
 			minus180, straightUp, m_LimelightDriveCommand = 0, m_LimelightSteerCommand = 0;
 
-	double STEER_K = 3, DRIVE_K = 0, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
+	double STEER_K = 6, DRIVE_K = 0, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
 
 	int counter = 0;
 	
@@ -89,7 +89,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putBoolean("LED", true);
 		}
 		if (this.robot.PRACTICEBOT) {
-			this.zero = 2241;
+			this.zero = 2162;//2241;
 		} else {
 			this.zero = -2063;
 		}
@@ -136,8 +136,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		double encoderSign = Math.abs(this.robot.wrist.getSelectedSensorPosition()) / this.robot.wrist.getSelectedSensorPosition();
-
 		this.robot.nothing1.set(true);
 		this.robot.nothing2.set(true);
 
@@ -435,14 +433,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 			if (this.robot.operator.getXButtonPressed()) {
 				this.robot.toggleHatchExtension();
-			}
-
-			if (this.robot.limelight != null) {
-				if (this.wristSetPoint == this.zero) {
-					this.robot.disableLimelightLEDs();
-				} else {
-					this.robot.enableLimelightLEDs();
-				}
 			}
 
 			counter ++;
