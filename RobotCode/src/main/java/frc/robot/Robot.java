@@ -22,7 +22,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 300, zero,
 			minus180, straightUp, m_LimelightDriveCommand = 0, m_LimelightSteerCommand = 0;
 
-	double STEER_K = 6, DRIVE_K = 0, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 100;
+	double STEER_K = 10, DRIVE_K = 0, DESIRED_TARGET_AREA = 7.1, MAX_DRIVE = 70;
 
 	int counter = 0;
 	
@@ -306,8 +306,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			this.straightUp = (this.zero + this.minus180) / 2;*/
 
 			// Calculate drive power
-			double forward = Math.pow(this.robot.driver.getY(Hand.kLeft), 1) * .8,
-					turn = Math.pow(this.robot.driver.getX(Hand.kRight), 1) * .6;
+			double forward = this.robot.driver.getY(Hand.kLeft) * .8,
+					turn = this.robot.driver.getX(Hand.kRight);
 			if (Math.abs(forward) < 0.2d) {
 				forward = 0;
 			}
@@ -359,7 +359,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}*/
 
 			// Vision?
-			if (this.robot.driver.getAButton()) {
+			if (this.robot.driver.getAButton() && robot.limelight.getEntry("ty").getDouble(0) >= 0) {
 				this.visEnabled = true;
 			}
 			else{
@@ -473,9 +473,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		  double drive_cmd = (ty) * DRIVE_K;
   
 		  // don't let the robot drive too fast into the goal
-		  if (drive_cmd > MAX_DRIVE)
+		  if (Math.abs(m_LimelightSteerCommand) > MAX_DRIVE)
 		  {
-			drive_cmd = MAX_DRIVE;
+			if(m_LimelightSteerCommand > 0){
+				m_LimelightSteerCommand = MAX_DRIVE;
+			}
+			else{
+				m_LimelightSteerCommand = -MAX_DRIVE;
+			}
 		  }
 		  m_LimelightDriveCommand = drive_cmd;
 	}
