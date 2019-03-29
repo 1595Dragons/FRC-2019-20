@@ -16,7 +16,9 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.extender.toggleExtension;
 import frc.robot.commands.mittens.toggleMitten;
+import frc.robot.commands.wrist.MoveToMinus180;
 import frc.robot.commands.wrist.MoveToUp;
+import frc.robot.commands.wrist.MoveToZero;
 import frc.robot.commands.wrist.WristPosition;
 import frc.robot.controllers.operator;
 import frc.robot.subsystems.Extenders;
@@ -63,6 +65,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		SmartDashboard.putData("Toggle mittens", new toggleMitten());
 		SmartDashboard.putData("Toggle extension", new toggleExtension());
 		SmartDashboard.putData("Wrist straight-up", new MoveToUp());
+		SmartDashboard.putData("Wrist zero", new MoveToZero());
+		SmartDashboard.putData("Wrist minus 180", new MoveToMinus180());
 
 		SmartDashboard.putData(Scheduler.getInstance());
 
@@ -301,6 +305,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			} else {
 				RobotMap.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
 			}
+
+			SmartDashboard.putNumber("Wrist displacement", Wrist.getSetPoint() - RobotMap.wrist.getSelectedSensorPosition());
 
 			if (this.robot.operator.getBButtonPressed()) {
 				Wrist.manual = !Wrist.manual;
