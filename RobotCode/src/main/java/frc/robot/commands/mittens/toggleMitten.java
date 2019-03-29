@@ -18,9 +18,4 @@ public class toggleMitten extends Command {
 	protected void initialize() {
 		Robot.mitten.toggleMittens();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
-
 }

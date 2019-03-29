@@ -18,9 +18,4 @@ public class Release extends Command {
 	protected void initialize() {
 		Robot.mitten.release();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
-
 }

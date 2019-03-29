@@ -18,8 +18,4 @@ public class toggleExtension extends Command {
 	protected void initialize() {
 		Robot.extender.toggle();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
 }

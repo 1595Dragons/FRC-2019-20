@@ -18,8 +18,4 @@ public class Retract extends Command {
 	protected void initialize() {
 		Robot.extender.retract();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
 }

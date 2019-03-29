@@ -18,9 +18,4 @@ public class Secure extends Command {
 	protected void initialize() {
 		Robot.mitten.secure();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
-
 }

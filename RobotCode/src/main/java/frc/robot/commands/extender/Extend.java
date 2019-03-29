@@ -18,8 +18,4 @@ public class Extend extends Command {
 	protected void initialize() {
 		Robot.extender.extend();
 	}
-
-	protected void execute() {
-		// Do nothing for now
-	}
 }

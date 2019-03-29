@@ -7,7 +7,7 @@ public class MoveToZero extends Command {
 
 	public MoveToZero() {
 		this.requires(Robot.wristSubsystem);
-		this.setTimeout(0.04);
+		this.setTimeout(0.04d);
 	}
 
 	@Override

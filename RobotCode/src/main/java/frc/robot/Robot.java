@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.extender.toggleExtension;
 import frc.robot.commands.mittens.toggleMitten;
+import frc.robot.commands.wrist.MoveToUp;
 import frc.robot.commands.wrist.WristPosition;
 import frc.robot.controllers.operator;
 import frc.robot.subsystems.Extenders;
@@ -51,7 +52,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		Robot.extender = new Extenders("Extender");
 		Robot.mitten = new Mittens("Mitten");
 		Robot.wristSubsystem = new Wrist("Wrist");
-		
+
 		try {
 			Robot.op = new operator();
 		} catch (Exception e) {
@@ -61,6 +62,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		// Add an option to smartdashboard to activate commands manually
 		SmartDashboard.putData("Toggle mittens", new toggleMitten());
 		SmartDashboard.putData("Toggle extension", new toggleExtension());
+		SmartDashboard.putData("Wrist straight-up", new MoveToUp());
 
 		SmartDashboard.putData(Scheduler.getInstance());
 
@@ -85,7 +87,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		SmartDashboard.putNumber("Max Vel DT", this.maxVelDT);
 		SmartDashboard.putBoolean("neg", neg);
 		RobotMap.wrist.configAllowableClosedloopError(0, 10);
-		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
+		Wrist.setSetPoint(RobotMap.wrist.getSelectedSensorPosition());
 
 		// Try to setup limelight
 		if (RobotMap.limelight != null) {
@@ -144,7 +146,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		RobotMap.wrist.config_IntegralZone(0, this.iZone);
 		RobotMap.wrist.configMotionCruiseVelocity((int) (this.cruiseVel)); // ticks per 100MS
 		RobotMap.wrist.configMotionAcceleration((int) (this.maxAccel)); // ticks per 100MS per second
-		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
+		Wrist.setSetPoint(RobotMap.wrist.getSelectedSensorPosition());
 
 		// Drive train PID
 		this.DTkP = SmartDashboard.getNumber("DTkP", this.DTkP);
@@ -287,7 +289,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Wrist
 			// Update desired position
 			if (Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d) {
-				Wrist.wristSetpoint += this.robot.operator.getY(Hand.kLeft) * 40;
+				Wrist.setSetPoint(Wrist.getSetPoint() + (int) (this.robot.operator.getY(Hand.kLeft) * 40));
 			}
 			// Gets d-pad inputs
 			/*
@@ -304,7 +306,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 			// arbitrary feed forward accounts for gravity
 			this.arbFeedForward = -Math.sin(wristTickToAng(RobotMap.wrist.getSelectedSensorPosition()
-					- (WristPosition.UP.getValue() + (this.robot.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
+					- (WristPosition.UP.getValue() + (RobotMap.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
 			if (!this.manualOveride) {
 				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.getSetPoint(), DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
