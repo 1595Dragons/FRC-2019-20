@@ -30,7 +30,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
 			outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180;
 
-	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 10;
+	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90;
 
 	private MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
@@ -83,7 +83,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Try to setup limelight
-		if (this.robot.limelight != null) {
+		if (RobotMap.limelight != null) {
 			SmartDashboard.putBoolean("LED", true);
 		}
 	}
@@ -132,13 +132,13 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.cruiseVel = (int) SmartDashboard.getNumber("Cruise Vel", this.cruiseVel);
 		this.maxAccel = (int) SmartDashboard.getNumber("Max Accel", this.maxAccel);
 		this.maxVelDT = SmartDashboard.getNumber("Max Vel DT", this.maxVelDT);
-		RobotMap.wrist.config_kP(0, this.kP, this.kTimeOutMs);
-		RobotMap.wrist.config_kI(0, this.kI, this.kTimeOutMs);
-		RobotMap.wrist.config_kD(0, this.kD, this.kTimeOutMs);
-		RobotMap.wrist.config_kF(0, this.kF, this.kTimeOutMs);
-		RobotMap.wrist.config_IntegralZone(0, this.iZone, this.kTimeOutMs);
-		RobotMap.wrist.configMotionCruiseVelocity((int) (this.cruiseVel), this.kTimeOutMs); // ticks per 100MS
-		RobotMap.wrist.configMotionAcceleration((int) (this.maxAccel), this.kTimeOutMs); // ticks per 100MS per second
+		RobotMap.wrist.config_kP(0, this.kP);
+		RobotMap.wrist.config_kI(0, this.kI);
+		RobotMap.wrist.config_kD(0, this.kD);
+		RobotMap.wrist.config_kF(0, this.kF);
+		RobotMap.wrist.config_IntegralZone(0, this.iZone);
+		RobotMap.wrist.configMotionCruiseVelocity((int) (this.cruiseVel)); // ticks per 100MS
+		RobotMap.wrist.configMotionAcceleration((int) (this.maxAccel)); // ticks per 100MS per second
 		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Drive train PID
@@ -147,14 +147,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.DTkD = SmartDashboard.getNumber("DTkD", this.DTkD);
 		this.LDTkF = SmartDashboard.getNumber("LDTkF", this.LDTkF);
 		this.RDTkF = SmartDashboard.getNumber("RDTkF", this.RDTkF);
-		this.robot.leftDrive.config_kP(0, this.DTkP);
-		this.robot.leftDrive.config_kI(0, this.DTkI);
-		this.robot.leftDrive.config_kD(0, this.DTkD);
-		this.robot.leftDrive.config_kF(0, this.LDTkF);
-		this.robot.rightDrive.config_kP(0, this.DTkP);
-		this.robot.rightDrive.config_kI(0, this.DTkI);
-		this.robot.rightDrive.config_kD(0, this.DTkD);
-		this.robot.rightDrive.config_kF(0, this.RDTkF);
+		RobotMap.leftDrive.config_kP(0, this.DTkP);
+		RobotMap.leftDrive.config_kI(0, this.DTkI);
+		RobotMap.leftDrive.config_kD(0, this.DTkD);
+		RobotMap.leftDrive.config_kF(0, this.LDTkF);
+		RobotMap.rightDrive.config_kP(0, this.DTkP);
+		RobotMap.rightDrive.config_kI(0, this.DTkI);
+		RobotMap.rightDrive.config_kD(0, this.DTkD);
+		RobotMap.rightDrive.config_kF(0, this.RDTkF);
 
 		// Outtake speed limit
 		this.outtakePresetSpeed = SmartDashboard.getNumber("Outtake Preset Speed", this.outtakePresetSpeed);
@@ -170,11 +170,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			Scheduler.getInstance().run();
 
 			// Drive train velocities
-			SmartDashboard.putNumber("Left velocity", this.robot.leftDrive.getSelectedSensorVelocity());
-			SmartDashboard.putNumber("Right velocity", this.robot.rightDrive.getSelectedSensorVelocity());
-
-			// Log driver button
-			// SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
+			SmartDashboard.putNumber("Left velocity", RobotMap.leftDrive.getSelectedSensorVelocity());
+			SmartDashboard.putNumber("Right velocity", RobotMap.rightDrive.getSelectedSensorVelocity());
 
 			// Wrist stuff
 			/*
@@ -187,7 +184,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			 * WristPosition.UP.getValue()))); neg = SmartDashboard.getBoolean("neg",
 			 * this.neg); // Ball?
 			 */
-			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
+			SmartDashboard.putBoolean("Has ball", !RobotMap.ballIn.get());
 
 			// If the limelight stuff is not null, show its values
 			if (RobotMap.limelight != null) {
@@ -204,7 +201,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 				// d = (h2-h1) / tan(a1+a2)
 				double distance = (28.5 - 11)
-						/ Math.tan(Math.toRadians(this.robot.limelight.getEntry("tx").getDouble(0)));
+						/ Math.tan(Math.toRadians(RobotMap.limelight.getEntry("tx").getDouble(0)));
 			}
 
 		} catch (Exception e) {
@@ -227,7 +224,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		try {
 			// Limelight stuff
 			this.pid.setSetpoint(this.visSetpoint);
-			this.vis = this.visEnabled ? this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0)) : 0;
+			this.vis = this.visEnabled ? this.pid.getOutput(RobotMap.limelight.getEntry("ty").getDouble(0)) : 0;
 
 			// Calculate drive power
 			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .6;
@@ -242,24 +239,24 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 			// West coast drive with PID
 			if (this.robot.driver.getBumper(Hand.kLeft)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + this.vis);
+				RobotMap.leftDrive.set(ControlMode.Velocity, (forward - turn) * this.maxVelDT - this.vis);
+				RobotMap.rightDrive.set(ControlMode.Velocity, (forward + turn) * this.maxVelDT + this.vis);
 			} else if (this.robot.driver.getBumper(Hand.kRight)) {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + this.vis);
+				RobotMap.leftDrive.set(ControlMode.Velocity, (forward - turn * .5) * .4 * this.maxVelDT - this.vis);
+				RobotMap.rightDrive.set(ControlMode.Velocity, (forward + turn * .5) * .4 * this.maxVelDT + this.vis);
 			} else {
-				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
+				RobotMap.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
+				RobotMap.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
 			}
 
 			// Vision driving
 			if (forward == 0 && turn == 0) {
-				this.robot.leftDrive.set(ControlMode.Velocity, -this.vis);
-				this.robot.rightDrive.set(ControlMode.Velocity, +this.vis);
+				RobotMap.leftDrive.set(ControlMode.Velocity, -this.vis);
+				RobotMap.rightDrive.set(ControlMode.Velocity, +this.vis);
 			}
 
 			// Controller vibration
-			if (Math.abs(this.robot.limelight.getEntry("ty").getDouble(0) - this.visSetpoint) < 1 && this.visEnabled) {
+			if (Math.abs(RobotMap.limelight.getEntry("ty").getDouble(0) - this.visSetpoint) < 1 && this.visEnabled) {
 				this.robot.driver.setRumble(RumbleType.kLeftRumble, .1);
 				this.robot.driver.setRumble(RumbleType.kRightRumble, .1);
 
@@ -286,7 +283,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 					inspeed = 0;
 
 					// If the robot does not have the ball, allow intaking 
-			if (this.robot.ballIn.get()) {
+			if (RobotMap.ballIn.get()) {
 				inspeed = this.robot.operator.getTriggerAxis(Hand.kLeft) > .3 ? this.outtakePresetSpeed : 0;
 			}
 
@@ -319,10 +316,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				if (this.robot.PRACTICEBOT) {
 					Wrist.wristSetpoint += 3937; // This is the offset difference between the two
 				}
-				this.robot.wrist.set(ControlMode.MotionMagic, Wrist.wristSetpoint, DemandType.ArbitraryFeedForward,
+				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.wristSetpoint, DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
 			} else {
-				this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
+				RobotMap.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
 			}
 
 			if (this.robot.operator.getBButtonPressed()) {

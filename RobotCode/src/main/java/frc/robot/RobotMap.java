@@ -57,7 +57,7 @@ public class RobotMap {
 	 * Real Robot solenoid ports
 	 */
 	private static final int extenderPort1 = 2, extenderPort2 = 6, clamperPort1 = 3, clamperPort2 = 7, nothing1Port = 4,
-			nothing2Port = 0, ballInPort = 0, limeLightServoPort = 1;
+			nothing2Port = 0, ballInPort = 0;
 
 	private int currentlimit = 15;
 
@@ -68,10 +68,14 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
-	public Motor leftDrive, rightDrive;
-	public static TalonSRX wrist, outtake;
+	public static TalonSRX leftDrive, rightDrive, wrist, outtake;
 
-	private static TalonSRX outtakeSlave;
+	/**
+	 * Declare the motors that will be used on the robot, but that shouldnt be used
+	 * by other classes. This is most commonly the slave motors used on the drive
+	 * train.
+	 */
+	private static TalonSRX outtakeSlave, leftSlave1, rightSlave1, leftSlave2, rightSlave2;
 
 	/**
 	 * Declare the solenoids that will be used in the robot, but keep them private,
@@ -79,23 +83,16 @@ public class RobotMap {
 	 * initalize them.
 	 */
 	public static DoubleSolenoid extender, clamper;
-	public Solenoid nothing1, nothing2;
 
-	/**
-	 * Declare the motors that will be used on the robot, but that shouldnt be used
-	 * by other classes. This is most commonly the slave motors used on the drive
-	 * train.
-	 */
-	private Motor leftDrive2, rightDrive2, leftDrive3, rightDrive3;
+	@Deprecated
+	public Solenoid nothing1, nothing2;
 
 	public static DigitalInput ballIn;
 
 	/**
 	 * Setup the controllers for the drivers.
 	 */
-	public final XboxController driver = new XboxController(0);
-	@Deprecated
-	public final XboxController operator = new XboxController(1);
+	public final XboxController driver = new XboxController(0), operator = new XboxController(1);
 
 	/**
 	 * Create the object for the driver camera, as well as the vision camera (if one
@@ -112,7 +109,7 @@ public class RobotMap {
 	 * the object the chooser will return is the individual motor to be run during
 	 * test mode.
 	 */
-	private SendableChooser<Motor> chooser = new SendableChooser<>();
+	private SendableChooser<TalonSRX> chooser = new SendableChooser<>();
 
 	/**
 	 * Setup everything on the robot.
@@ -125,27 +122,26 @@ public class RobotMap {
 		// Apply port addresses to the robot, based on whether or not it is the practice
 		// bot.
 		if (this.PRACTICEBOT) {
-			this.leftDrive = new Motor(RobotMap.PracticeleftDrive1Port);
-			this.leftDrive2 = new Motor(RobotMap.PracticeleftDrive2Port);
-			this.leftDrive3 = new Motor(RobotMap.PracticeleftDrive3Port);
-			this.rightDrive = new Motor(RobotMap.PracticerightDrive1Port);
-			this.rightDrive2 = new Motor(RobotMap.PracticerightDrive2Port);
-			this.rightDrive3 = new Motor(RobotMap.PracticerightDrive3Port);
+			RobotMap.leftDrive = new TalonSRX(RobotMap.PracticeleftDrive1Port);
+			RobotMap.leftSlave1 = new TalonSRX(RobotMap.PracticeleftDrive2Port);
+			RobotMap.leftSlave2 = new TalonSRX(RobotMap.PracticeleftDrive3Port);
+			RobotMap.rightDrive = new TalonSRX(RobotMap.PracticerightDrive1Port);
+			RobotMap.rightSlave1 = new TalonSRX(RobotMap.PracticerightDrive2Port);
+			RobotMap.rightSlave2 = new TalonSRX(RobotMap.PracticerightDrive3Port);
 			RobotMap.wrist = new TalonSRX(RobotMap.PracticewristPort);
 			RobotMap.outtake = new TalonSRX(RobotMap.PracticeleftOuttakePort);
 			RobotMap.outtakeSlave = new TalonSRX(RobotMap.PracticerightOuttakePort);
-
 			RobotMap.extender = new DoubleSolenoid(RobotMap.PracticeextenderPort1, RobotMap.PracticeextenderPort2);
 			RobotMap.clamper = new DoubleSolenoid(RobotMap.PracticeclamperPort1, RobotMap.PracticeclamperPort2);
 			this.nothing1 = new Solenoid(RobotMap.Practicenothing1Port);
 			this.nothing2 = new Solenoid(RobotMap.Practicenothing2Port);
 		} else {
-			this.leftDrive = new Motor(RobotMap.leftDrive1Port);
-			this.leftDrive2 = new Motor(RobotMap.leftDrive2Port);
-			this.leftDrive3 = new Motor(RobotMap.leftDrive3Port);
-			this.rightDrive = new Motor(RobotMap.rightDrive1Port);
-			this.rightDrive2 = new Motor(RobotMap.rightDrive2Port);
-			this.rightDrive3 = new Motor(RobotMap.rightDrive3Port);
+			RobotMap.leftDrive = new TalonSRX(RobotMap.leftDrive1Port);
+			RobotMap.leftSlave1 = new TalonSRX(RobotMap.leftDrive2Port);
+			RobotMap.leftSlave2 = new TalonSRX(RobotMap.leftDrive3Port);
+			RobotMap.rightDrive = new TalonSRX(RobotMap.rightDrive1Port);
+			RobotMap.rightSlave1 = new TalonSRX(RobotMap.rightDrive2Port);
+			RobotMap.rightSlave2 = new TalonSRX(RobotMap.rightDrive3Port);
 			RobotMap.wrist = new TalonSRX(RobotMap.wristPort);
 			RobotMap.outtake = new TalonSRX(RobotMap.leftOuttakePort);
 			RobotMap.outtakeSlave = new TalonSRX(RobotMap.rightOuttakePort);
@@ -155,48 +151,47 @@ public class RobotMap {
 			this.nothing2 = new Solenoid(RobotMap.nothing2Port);
 		}
 
-		// Setup limelight (only on comp robot)
-		this.limelight = NetworkTableInstance.getDefault().getTable("limelight");
+		// Setup limelight
+		RobotMap.limelight = NetworkTableInstance.getDefault().getTable("limelight");
 
 		// Setup encoders
-		this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+		RobotMap.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+		RobotMap.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 		RobotMap.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		RobotMap.ballIn = new DigitalInput(ballInPort);
 
 		// Set the secondary motors to follow the first ones
-		this.leftDrive2.set(ControlMode.Follower, this.leftDrive.getDeviceID());
-		this.leftDrive3.set(ControlMode.Follower, this.leftDrive.getDeviceID());
-		this.rightDrive2.set(ControlMode.Follower, this.rightDrive.getDeviceID());
-		this.rightDrive3.set(ControlMode.Follower, this.rightDrive.getDeviceID());
+		RobotMap.leftSlave1.set(ControlMode.Follower, RobotMap.leftDrive.getDeviceID());
+		RobotMap.leftSlave2.set(ControlMode.Follower, RobotMap.leftDrive.getDeviceID());
+		RobotMap.rightSlave1.set(ControlMode.Follower, RobotMap.rightDrive.getDeviceID());
+		RobotMap.rightSlave2.set(ControlMode.Follower, RobotMap.rightDrive.getDeviceID());
 		RobotMap.outtakeSlave.set(ControlMode.Follower, RobotMap.outtake.getDeviceID());
 
 		// Set the motors to break
 		RobotMap.outtake.setNeutralMode(NeutralMode.Brake);
 		RobotMap.outtakeSlave.setNeutralMode(NeutralMode.Brake);
-		this.rightDrive.setNeutralMode(NeutralMode.Brake);
-		this.leftDrive.setNeutralMode(NeutralMode.Brake);
+		RobotMap.rightDrive.setNeutralMode(NeutralMode.Brake);
+		RobotMap.leftDrive.setNeutralMode(NeutralMode.Brake);
 
 		// Invert necessary drive motors
-		this.leftDrive.setInverted(true);
-		this.leftDrive2.setInverted(true);
-		this.leftDrive3.setInverted(true);
-		//this.rightOuttake.setInverted(true);
+		RobotMap.leftDrive.setInverted(true);
+		RobotMap.leftSlave1.setInverted(true);
+		RobotMap.leftSlave2.setInverted(true);
 		RobotMap.outtakeSlave.setInverted(true);
 
 		// State whether the sensor is in phase with the motor
-		this.rightDrive.setSensorPhase(true);
-		this.leftDrive.setSensorPhase(true);
+		RobotMap.rightDrive.setSensorPhase(true);
+		RobotMap.leftDrive.setSensorPhase(true);
 		RobotMap.wrist.setSensorPhase(true);
 
 		// Config current limit
-		this.leftDrive.configContinuousCurrentLimit(this.currentlimit);
-		this.rightDrive.configContinuousCurrentLimit(this.currentlimit);
-		this.leftDrive2.configContinuousCurrentLimit(this.currentlimit);
-		this.leftDrive3.configContinuousCurrentLimit(this.currentlimit);
-		this.rightDrive2.configContinuousCurrentLimit(this.currentlimit);
-		this.rightDrive3.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.leftDrive.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.rightDrive.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.leftSlave1.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.leftSlave2.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.rightSlave1.configContinuousCurrentLimit(this.currentlimit);
+		RobotMap.rightSlave2.configContinuousCurrentLimit(this.currentlimit);
 		RobotMap.wrist.configContinuousCurrentLimit(10);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
@@ -208,12 +203,11 @@ public class RobotMap {
 			RobotMap.driverCam1.setExposureManual(40);
 			RobotMap.driverCam1.setBrightness(40);
 			/*
-			RobotMap.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
-			RobotMap.driverCam2.setFPS(15);
-			RobotMap.driverCam2.setResolution(320, 240);
-			RobotMap.driverCam2.setExposureManual(75);
-			RobotMap.driverCam2.setBrightness(75);
-			*/
+			 * RobotMap.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
+			 * RobotMap.driverCam2.setFPS(15); RobotMap.driverCam2.setResolution(320, 240);
+			 * RobotMap.driverCam2.setExposureManual(75);
+			 * RobotMap.driverCam2.setBrightness(75);
+			 */
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -225,12 +219,12 @@ public class RobotMap {
 	 */
 	public void setupTestMode() {
 		// This is for running the motors one at a time during test mode
-		this.chooser.setDefaultOption("Right 1", this.rightDrive);
-		this.chooser.addOption("Right 2", this.rightDrive2);
-		this.chooser.addOption("Right 3", this.rightDrive3);
-		this.chooser.addOption("Left 1", this.leftDrive);
-		this.chooser.addOption("Left 2", this.leftDrive2);
-		this.chooser.addOption("Left 3", this.leftDrive3);
+		this.chooser.setDefaultOption("Right 1", RobotMap.rightDrive);
+		this.chooser.addOption("Right 2", RobotMap.rightSlave1);
+		this.chooser.addOption("Right 3", RobotMap.rightSlave2);
+		this.chooser.addOption("Left 1", RobotMap.leftDrive);
+		this.chooser.addOption("Left 2", RobotMap.leftSlave1);
+		this.chooser.addOption("Left 3", RobotMap.leftSlave2);
 
 		// Add the chooser to smart dashboard
 		edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putData(this.chooser);
@@ -250,9 +244,9 @@ public class RobotMap {
 	public void testMotors() {
 		double power = this.driver.getY(edu.wpi.first.wpilibj.GenericHID.Hand.kLeft);
 		if (Math.abs(power) > 0.2d) {
-			this.chooser.getSelected().setPower(power);
+			this.chooser.getSelected().set(ControlMode.PercentOutput, power);
 		} else {
-			this.chooser.getSelected().stop();
+			this.chooser.getSelected().set(ControlMode.PercentOutput, 0);
 		}
 	}
 
