@@ -51,7 +51,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		Robot.extender = new Extenders("Extender");
 		Robot.mitten = new Mittens("Mitten");
 		Robot.wristSubsystem = new Wrist("Wrist");
-		Robot.op = new operator();
+		
+		try {
+			Robot.op = new operator();
+		} catch (Exception e) {
+			System.err.println("Please plug in the operator controller");
+		}
 
 		// Add an option to smartdashboard to activate commands manually
 		SmartDashboard.putData("Toggle mittens", new toggleMitten());
@@ -271,7 +276,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			double outspeed = this.robot.operator.getTriggerAxis(Hand.kRight) > .3 ? -this.outtakePresetSpeed : 0,
 					inspeed = 0;
 
-					// If the robot does not have the ball, allow intaking 
+			// If the robot does not have the ball, allow intaking
 			if (RobotMap.ballIn.get()) {
 				inspeed = this.robot.operator.getTriggerAxis(Hand.kLeft) > .3 ? this.outtakePresetSpeed : 0;
 			}
@@ -301,11 +306,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			this.arbFeedForward = -Math.sin(wristTickToAng(RobotMap.wrist.getSelectedSensorPosition()
 					- (WristPosition.UP.getValue() + (this.robot.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
 			if (!this.manualOveride) {
-				// If the robot is the practice one, adjust the value slightly
-				if (this.robot.PRACTICEBOT) {
-					Wrist.wristSetpoint += 3937; // This is the offset difference between the two
-				}
-				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.wristSetpoint, DemandType.ArbitraryFeedForward,
+				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.getSetPoint(), DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
 			} else {
 				RobotMap.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));

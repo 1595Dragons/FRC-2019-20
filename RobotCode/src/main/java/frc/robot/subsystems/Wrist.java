@@ -1,11 +1,14 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.robot.RobotMap;
 import frc.robot.commands.wrist.WristPosition;
 
 public class Wrist extends Subsystem {
 
-	public static int wristSetpoint; // TODO Adjust wrist here becasue of practice offset (+3937)
+	private static int wristSetpoint;
+
+	public static boolean manual = false;
 
 	public Wrist() {
 		super("Wrist");
@@ -17,31 +20,43 @@ public class Wrist extends Subsystem {
 
 	@Override
 	protected void initDefaultCommand() {
-
 	}
 
 	public void moveToZero() {
-		Wrist.wristSetpoint = WristPosition.ZERO.getValue();
+		this.moveTo(WristPosition.ZERO);
 	}
 
 	public void moveToUp() {
-		Wrist.wristSetpoint = WristPosition.UP.getValue();
+		this.moveTo(WristPosition.UP);
 	}
 
 	public void moveToMinus180() {
-		Wrist.wristSetpoint = WristPosition.MINUS180.getValue();
+		this.moveTo(WristPosition.MINUS180);
 	}
 
 	public void moveToForwardExchange() {
-		Wrist.wristSetpoint = WristPosition.FORWARDEXCHANGE.getValue();
+		this.moveTo(WristPosition.FORWARDEXCHANGE);
 	}
 
 	public void moveToReverseExhange() {
-		Wrist.wristSetpoint = WristPosition.REVERSEEXCHANGE.getValue();
+		this.moveTo(WristPosition.REVERSEEXCHANGE);
 	}
 
 	public void moveTo(WristPosition position) {
-		Wrist.wristSetpoint = position.getValue();
+		this.adjustWristPosition(position.getValue());
+	}
+
+	private void adjustWristPosition(int position) {
+		// 3937 is the difference between the practice and comp encoder
+		Wrist.wristSetpoint = RobotMap.PRACTICEBOT ? position + 3937 : position;
+	}
+
+	public static void setSetPoint(int setpoint) {
+		Wrist.wristSetpoint = setpoint;
+	}
+
+	public static int getSetPoint() {
+		return Wrist.wristSetpoint;
 	}
 
 }

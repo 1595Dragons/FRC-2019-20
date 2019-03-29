@@ -27,7 +27,7 @@ public class RobotMap {
 	/**
 	 * Create a boolean to check if this is the practice robot
 	 */
-	public boolean PRACTICEBOT = true;
+	public static final boolean PRACTICEBOT = true;
 
 	/**
 	 * Network table used by the limelight
