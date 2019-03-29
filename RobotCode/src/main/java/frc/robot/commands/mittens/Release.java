@@ -5,17 +5,17 @@ import frc.robot.Robot;
 
 public class Release extends Command {
 
-    public Release() {
-        this.requires(Robot.mitten);
-        this.setTimeout(0.02d);
-    }
+	public Release() {
+		this.requires(Robot.mitten);
+		this.setTimeout(0.02d);
+	}
 
-    @Override
-    protected boolean isFinished() {
-        return this.isTimedOut();
-    }
+	@Override
+	protected boolean isFinished() {
+		return this.isTimedOut();
+	}
 
-    protected void initialize() {
+	protected void initialize() {
 		Robot.mitten.release();
 	}
 

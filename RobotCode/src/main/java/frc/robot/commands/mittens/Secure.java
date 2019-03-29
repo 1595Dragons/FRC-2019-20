@@ -5,22 +5,22 @@ import frc.robot.Robot;
 
 public class Secure extends Command {
 
-    public Secure() {
-        this.requires(Robot.mitten);
-        this.setTimeout(0.02d);
-    }
+	public Secure() {
+		this.requires(Robot.mitten);
+		this.setTimeout(0.02d);
+	}
 
-    @Override
-    protected boolean isFinished() {
-        return this.isTimedOut();
-    }
+	@Override
+	protected boolean isFinished() {
+		return this.isTimedOut();
+	}
 
-    protected void initialize() {
-        Robot.mitten.secure();
-    }
+	protected void initialize() {
+		Robot.mitten.secure();
+	}
 
-    protected void execute() {
-        // Do nothing for now
-    }
+	protected void execute() {
+		// Do nothing for now
+	}
 
 }

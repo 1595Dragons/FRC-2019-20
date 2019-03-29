@@ -5,22 +5,22 @@ import frc.robot.Robot;
 
 public class toggleMitten extends Command {
 
-    public toggleMitten() {
-        this.requires(Robot.mitten);
-        this.setTimeout(0.02d);
-    }
+	public toggleMitten() {
+		this.requires(Robot.mitten);
+		this.setTimeout(0.02d);
+	}
 
-    @Override
-    protected boolean isFinished() {
-        return this.isTimedOut();
-    }
+	@Override
+	protected boolean isFinished() {
+		return this.isTimedOut();
+	}
 
-    protected void initialize() {
-        Robot.mitten.toggleMittens();
-    }
+	protected void initialize() {
+		Robot.mitten.toggleMittens();
+	}
 
-    protected void execute() {
-        // Do nothing for now
-    }
+	protected void execute() {
+		// Do nothing for now
+	}
 
 }

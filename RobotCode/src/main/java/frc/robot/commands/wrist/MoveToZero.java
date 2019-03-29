@@ -5,17 +5,17 @@ import frc.robot.Robot;
 
 public class MoveToZero extends Command {
 
-    public MoveToZero() {
-        this.requires(Robot.wristSubsystem);
-        this.setTimeout(0.04);
-    }
+	public MoveToZero() {
+		this.requires(Robot.wristSubsystem);
+		this.setTimeout(0.04);
+	}
 
-    @Override
-    protected boolean isFinished() {
-        return this.isTimedOut();
-    }
+	@Override
+	protected boolean isFinished() {
+		return this.isTimedOut();
+	}
 
-    protected void initialize() {
+	protected void initialize() {
 		Robot.wristSubsystem.moveToZero();
 	}
 
