@@ -121,7 +121,7 @@ public class RobotMap {
 
 		// Apply port addresses to the robot, based on whether or not it is the practice
 		// bot.
-		if (this.PRACTICEBOT) {
+		if (RobotMap.PRACTICEBOT) {
 			RobotMap.leftDrive = new TalonSRX(RobotMap.PracticeleftDrive1Port);
 			RobotMap.leftSlave1 = new TalonSRX(RobotMap.PracticeleftDrive2Port);
 			RobotMap.leftSlave2 = new TalonSRX(RobotMap.PracticeleftDrive3Port);

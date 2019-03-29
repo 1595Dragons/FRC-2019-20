@@ -6,6 +6,9 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import frc.robot.commands.extender.toggleExtension;
 import frc.robot.commands.mittens.toggleMitten;
+import frc.robot.commands.wrist.MoveToForwardExchange;
+import frc.robot.commands.wrist.MoveToMinus180;
+import frc.robot.commands.wrist.MoveToReverseExchange;
 import frc.robot.commands.wrist.MoveToUp;
 import frc.robot.commands.wrist.MoveToZero;
 
@@ -26,5 +29,9 @@ public class operator {
 		// Add commands for autowrist
 		this.dpad_left.toggleWhenPressed(new MoveToZero());
 		this.dpad_up.toggleWhenPressed(new MoveToUp());
+		this.dpad_right.toggleWhenPressed(new MoveToMinus180());
+		this.left_bumper.toggleWhenPressed(new MoveToForwardExchange());
+		this.right_bumper.toggleWhenPressed(new MoveToReverseExchange());
+
 	}
 }

@@ -25,7 +25,7 @@ import frc.robot.subsystems.Wrist;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
-	private boolean neg = true, manualOveride = false, visEnabled = false;
+	private boolean neg = true, visEnabled = false;
 
 	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, viskP = 4, viskI = 0.01, viskD = 0, DTkP = 5,
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
@@ -115,9 +115,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 		// Limits for the wrist
 		RobotMap.wrist.configForwardSoftLimitThreshold((int) (WristPosition.UP.getValue()
-				+ wristAngToTick(this.forwardLimit) + (this.robot.PRACTICEBOT ? 3937 : 0)));
+				+ wristAngToTick(this.forwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
 		RobotMap.wrist.configReverseSoftLimitThreshold((int) (WristPosition.UP.getValue()
-				- wristAngToTick(this.backwardLimit) + (this.robot.PRACTICEBOT ? 3937 : 0)));
+				- wristAngToTick(this.backwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
 		RobotMap.wrist.configForwardSoftLimitEnable(true);
 		RobotMap.wrist.configReverseSoftLimitEnable(true);
 
@@ -291,23 +291,11 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			if (Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d) {
 				Wrist.setSetPoint(Wrist.getSetPoint() + (int) (this.robot.operator.getY(Hand.kLeft) * 40));
 			}
-			// Gets d-pad inputs
-			/*
-			 * if (this.robot.operator.getPOV() == 0) { // straight up Wrist.wristSetpoint =
-			 * this.straightUp; } else if (this.robot.operator.getPOV() == 90) { // minus
-			 * 180 this.wristSetPoint = this.straightUp - 1024; } else if
-			 * (this.robot.operator.getPOV() == 270) { // zero this.wristSetPoint =
-			 * this.straightUp + 1024; } else if
-			 * (this.robot.operator.getBumper(Hand.kRight)) { this.wristSetPoint =
-			 * this.straightUp - this.exchangePosOffset; } else if
-			 * (this.robot.operator.getBumper(Hand.kLeft)) { this.wristSetPoint =
-			 * this.straightUp + this.exchangePosOffset; }
-			 */
 
 			// arbitrary feed forward accounts for gravity
 			this.arbFeedForward = -Math.sin(wristTickToAng(RobotMap.wrist.getSelectedSensorPosition()
 					- (WristPosition.UP.getValue() + (RobotMap.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
-			if (!this.manualOveride) {
+			if (!Wrist.manual) {
 				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.getSetPoint(), DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
 			} else {
@@ -315,7 +303,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			if (this.robot.operator.getBButtonPressed()) {
-				this.manualOveride = !this.manualOveride;
+				Wrist.manual = !Wrist.manual;
 			}
 
 		} catch (Exception e) {
