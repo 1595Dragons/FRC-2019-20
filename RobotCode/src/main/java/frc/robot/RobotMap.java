@@ -10,7 +10,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -69,8 +68,10 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
-	public Motor leftDrive, rightDrive, leftOuttake, rightOuttake;
-	public static TalonSRX wrist;
+	public Motor leftDrive, rightDrive;
+	public static TalonSRX wrist, outtake;
+
+	private static TalonSRX outtakeSlave;
 
 	/**
 	 * Declare the solenoids that will be used in the robot, but keep them private,
@@ -106,12 +107,6 @@ public class RobotMap {
 	public static edu.wpi.cscore.UsbCamera driverCam1, driverCam2;
 
 	/**
-	 * Declare a private global boolean for the hatch panel mechanism functions.
-	 */
-	@Deprecated
-	public boolean hatchPanelSecured = false, hatchMechDeployed = false, popped = false;
-
-	/**
 	 * Declare a chooser (radio buttons on SmartDashboard) that will be used for
 	 * test mode. The reason why this takes a <code>Motor</code> object is becasue
 	 * the object the chooser will return is the individual motor to be run during
@@ -137,8 +132,8 @@ public class RobotMap {
 			this.rightDrive2 = new Motor(RobotMap.PracticerightDrive2Port);
 			this.rightDrive3 = new Motor(RobotMap.PracticerightDrive3Port);
 			RobotMap.wrist = new TalonSRX(RobotMap.PracticewristPort);
-			this.leftOuttake = new Motor(RobotMap.PracticeleftOuttakePort);
-			this.rightOuttake = new Motor(RobotMap.PracticerightOuttakePort);
+			RobotMap.outtake = new TalonSRX(RobotMap.PracticeleftOuttakePort);
+			RobotMap.outtakeSlave = new TalonSRX(RobotMap.PracticerightOuttakePort);
 
 			RobotMap.extender = new DoubleSolenoid(RobotMap.PracticeextenderPort1, RobotMap.PracticeextenderPort2);
 			RobotMap.clamper = new DoubleSolenoid(RobotMap.PracticeclamperPort1, RobotMap.PracticeclamperPort2);
@@ -152,9 +147,8 @@ public class RobotMap {
 			this.rightDrive2 = new Motor(RobotMap.rightDrive2Port);
 			this.rightDrive3 = new Motor(RobotMap.rightDrive3Port);
 			RobotMap.wrist = new TalonSRX(RobotMap.wristPort);
-			this.leftOuttake = new Motor(RobotMap.leftOuttakePort);
-			this.rightOuttake = new Motor(RobotMap.rightOuttakePort);
-
+			RobotMap.outtake = new TalonSRX(RobotMap.leftOuttakePort);
+			RobotMap.outtakeSlave = new TalonSRX(RobotMap.rightOuttakePort);
 			RobotMap.extender = new DoubleSolenoid(RobotMap.extenderPort1, RobotMap.extenderPort2);
 			RobotMap.clamper = new DoubleSolenoid(RobotMap.clamperPort1, RobotMap.clamperPort2);
 			this.nothing1 = new Solenoid(RobotMap.nothing1Port);
@@ -167,7 +161,7 @@ public class RobotMap {
 		// Setup encoders
 		this.leftDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 		this.rightDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-		this.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+		RobotMap.wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
 		RobotMap.ballIn = new DigitalInput(ballInPort);
 
@@ -176,11 +170,11 @@ public class RobotMap {
 		this.leftDrive3.set(ControlMode.Follower, this.leftDrive.getDeviceID());
 		this.rightDrive2.set(ControlMode.Follower, this.rightDrive.getDeviceID());
 		this.rightDrive3.set(ControlMode.Follower, this.rightDrive.getDeviceID());
-		this.rightOuttake.set(ControlMode.Follower, this.leftOuttake.getDeviceID());
+		RobotMap.outtakeSlave.set(ControlMode.Follower, RobotMap.outtake.getDeviceID());
 
 		// Set the motors to break
-		this.rightOuttake.setNeutralMode(NeutralMode.Brake);
-		this.leftOuttake.setNeutralMode(NeutralMode.Brake);
+		RobotMap.outtake.setNeutralMode(NeutralMode.Brake);
+		RobotMap.outtakeSlave.setNeutralMode(NeutralMode.Brake);
 		this.rightDrive.setNeutralMode(NeutralMode.Brake);
 		this.leftDrive.setNeutralMode(NeutralMode.Brake);
 
@@ -188,7 +182,8 @@ public class RobotMap {
 		this.leftDrive.setInverted(true);
 		this.leftDrive2.setInverted(true);
 		this.leftDrive3.setInverted(true);
-		this.rightOuttake.setInverted(true);
+		//this.rightOuttake.setInverted(true);
+		RobotMap.outtakeSlave.setInverted(true);
 
 		// State whether the sensor is in phase with the motor
 		this.rightDrive.setSensorPhase(true);
@@ -212,74 +207,15 @@ public class RobotMap {
 			RobotMap.driverCam1.setResolution(320 / 2, 240 / 2);
 			RobotMap.driverCam1.setExposureManual(40);
 			RobotMap.driverCam1.setBrightness(40);
+			/*
 			RobotMap.driverCam2 = CameraServer.getInstance().startAutomaticCapture(1);
 			RobotMap.driverCam2.setFPS(15);
 			RobotMap.driverCam2.setResolution(320, 240);
 			RobotMap.driverCam2.setExposureManual(75);
 			RobotMap.driverCam2.setBrightness(75);
+			*/
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Releases the hatch panel. (Opens the hatch mechanism).
-	 */
-	@Deprecated
-	public void releaseHatchPanel() {
-		this.clamper.set(Value.kReverse);
-		this.hatchPanelSecured = false;
-	}
-
-	/**
-	 * Secures the hatch panel. (Closes the hatch mechanism).
-	 */
-	@Deprecated
-	public void secureHatchPanel() {
-		this.clamper.set(Value.kForward);
-		this.hatchPanelSecured = true;
-	}
-
-	/**
-	 * Deploys the hatch mech.
-	 */
-	@Deprecated
-	public void extendHatch() {
-		this.extender.set(Value.kForward);
-		this.hatchMechDeployed = true;
-	}
-
-	/**
-	 * Retracts the hatch mech.
-	 */
-	@Deprecated
-	public void retracthHatch() {
-		this.extender.set(Value.kReverse);
-		this.hatchMechDeployed = false;
-	}
-
-	/**
-	 * Toggles the hatch panel mechanism. Either releasing or securing the hatch
-	 * panel.
-	 */
-	@Deprecated
-	public void toggleHatchMechanism() {
-		if (this.hatchPanelSecured) {
-			this.releaseHatchPanel();
-		} else {
-			this.secureHatchPanel();
-		}
-	}
-
-	/**
-	 * Toggles the hatch extension mechanism.
-	 */
-	@Deprecated
-	public void toggleHatchExtension() {
-		if (this.hatchMechDeployed) {
-			this.retracthHatch();
-		} else {
-			this.extendHatch();
 		}
 	}
 
@@ -328,14 +264,14 @@ public class RobotMap {
 	 * It just blinds Tristan.
 	 */
 	public void enableLimelightLEDs() {
-		this.limelight.getEntry("ledMode").setNumber(3);
+		RobotMap.limelight.getEntry("ledMode").setNumber(3);
 	}
 
 	/**
 	 * Turns iff the limelight LEDs.
 	 */
 	public void disableLimelightLEDs() {
-		this.limelight.getEntry("ledMode").setNumber(1);
+		RobotMap.limelight.getEntry("ledMode").setNumber(1);
 	}
 
 }

@@ -2,7 +2,6 @@ package frc.robot.commands.extender;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
-import frc.robot.subsystems.Extenders;
 
 public class toggleExtension extends Command {
 

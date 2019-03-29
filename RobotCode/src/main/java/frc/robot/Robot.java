@@ -225,7 +225,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		try {
-
 			// Limelight stuff
 			this.pid.setSetpoint(this.visSetpoint);
 			this.vis = this.visEnabled ? this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0)) : 0;
@@ -282,22 +281,17 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Vision Output", this.vis);
 
 			// Outtake stuff
-			// If the sensor sees nothing
+			// Get the speed for outtakeing
+			double outspeed = this.robot.operator.getTriggerAxis(Hand.kRight) > .3 ? -this.outtakePresetSpeed : 0,
+					inspeed = 0;
+
+					// If the robot does not have the ball, allow intaking 
 			if (this.robot.ballIn.get()) {
-				if (this.robot.operator.getTriggerAxis(Hand.kLeft) > .3) {
-					this.robot.leftOuttake.setPower(this.outtakePresetSpeed);
-				} else if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
-					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
-				} else {
-					this.robot.leftOuttake.setPower(0); // if no input on op, set to 0
-				}
-			} else { // if a ball is sensed only allow outtaking
-				if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
-					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
-				} else {
-					this.robot.leftOuttake.setPower(0); // Stop
-				}
+				inspeed = this.robot.operator.getTriggerAxis(Hand.kLeft) > .3 ? this.outtakePresetSpeed : 0;
 			}
+
+			// Apply that power
+			RobotMap.outtake.set(ControlMode.PercentOutput, outspeed + inspeed);
 
 			// Wrist
 			// Update desired position
