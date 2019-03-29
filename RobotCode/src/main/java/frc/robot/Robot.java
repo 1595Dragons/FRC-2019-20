@@ -173,17 +173,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Left velocity", RobotMap.leftDrive.getSelectedSensorVelocity());
 			SmartDashboard.putNumber("Right velocity", RobotMap.rightDrive.getSelectedSensorVelocity());
 
-			// Wrist stuff
-			/*
-			 * SmartDashboard.putNumber("SetPoint", Wrist.wristSetpoint);
-			 * SmartDashboard.putNumber("Raw Wrist Position",
-			 * RobotMap.wrist.getSelectedSensorPosition());
-			 * SmartDashboard.putNumber("Adjusted Wrist Position (Ang)",
-			 * wristTickToAng(RobotMap.wrist .getSelectedSensorPosition() -
-			 * (this.robot.PRACTICEBOT ? WristPosition.UP.getValue() + 3937 :
-			 * WristPosition.UP.getValue()))); neg = SmartDashboard.getBoolean("neg",
-			 * this.neg); // Ball?
-			 */
 			SmartDashboard.putBoolean("Has ball", !RobotMap.ballIn.get());
 
 			// If the limelight stuff is not null, show its values

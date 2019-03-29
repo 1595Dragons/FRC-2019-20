@@ -5,7 +5,7 @@ import frc.robot.commands.wrist.WristPosition;
 
 public class Wrist extends Subsystem {
 
-    public static int wristSetpoint;
+    public static int wristSetpoint; // TODO Adjust wrist here becasue of practice offset (+3937)
 
     public Wrist() {
         super("Wrist");
