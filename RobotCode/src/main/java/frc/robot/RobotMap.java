@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
@@ -68,7 +69,8 @@ public class RobotMap {
 	 * (Wait untill the constructor to do that).
 	 * 
 	 */
-	public Motor leftDrive, rightDrive, wrist, leftOuttake, rightOuttake;
+	public Motor leftDrive, rightDrive, leftOuttake, rightOuttake;
+	public static TalonSRX wrist;
 
 	/**
 	 * Declare the solenoids that will be used in the robot, but keep them private,
@@ -134,7 +136,7 @@ public class RobotMap {
 			this.rightDrive = new Motor(RobotMap.PracticerightDrive1Port);
 			this.rightDrive2 = new Motor(RobotMap.PracticerightDrive2Port);
 			this.rightDrive3 = new Motor(RobotMap.PracticerightDrive3Port);
-			this.wrist = new Motor(RobotMap.PracticewristPort);
+			RobotMap.wrist = new TalonSRX(RobotMap.PracticewristPort);
 			this.leftOuttake = new Motor(RobotMap.PracticeleftOuttakePort);
 			this.rightOuttake = new Motor(RobotMap.PracticerightOuttakePort);
 
@@ -149,7 +151,7 @@ public class RobotMap {
 			this.rightDrive = new Motor(RobotMap.rightDrive1Port);
 			this.rightDrive2 = new Motor(RobotMap.rightDrive2Port);
 			this.rightDrive3 = new Motor(RobotMap.rightDrive3Port);
-			this.wrist = new Motor(RobotMap.wristPort);
+			RobotMap.wrist = new TalonSRX(RobotMap.wristPort);
 			this.leftOuttake = new Motor(RobotMap.leftOuttakePort);
 			this.rightOuttake = new Motor(RobotMap.rightOuttakePort);
 
@@ -191,7 +193,7 @@ public class RobotMap {
 		// State whether the sensor is in phase with the motor
 		this.rightDrive.setSensorPhase(true);
 		this.leftDrive.setSensorPhase(true);
-		this.wrist.setSensorPhase(true);
+		RobotMap.wrist.setSensorPhase(true);
 
 		// Config current limit
 		this.leftDrive.configContinuousCurrentLimit(this.currentlimit);
@@ -200,7 +202,7 @@ public class RobotMap {
 		this.leftDrive3.configContinuousCurrentLimit(this.currentlimit);
 		this.rightDrive2.configContinuousCurrentLimit(this.currentlimit);
 		this.rightDrive3.configContinuousCurrentLimit(this.currentlimit);
-		this.wrist.configContinuousCurrentLimit(10);
+		RobotMap.wrist.configContinuousCurrentLimit(10);
 
 		// Setup camera (this has a high liklyhood of breaking, so surround it with a
 		// try catch block)

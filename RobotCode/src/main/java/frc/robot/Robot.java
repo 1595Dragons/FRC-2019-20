@@ -14,17 +14,21 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.extender.toggleExtension;
+import frc.robot.commands.mittens.toggleMitten;
+import frc.robot.commands.wrist.WristPosition;
+import frc.robot.controllers.operator;
 import frc.robot.subsystems.Extenders;
 import frc.robot.subsystems.Mittens;
+import frc.robot.subsystems.Wrist;
 
 public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
-	private boolean neg = true, manualOveride = false, visEnabled = false, manualWrist = false;
+	private boolean neg = true, manualOveride = false, visEnabled = false;
 
 	private double kP = 2, kI = 0.001, kD = 0, kF = 0, kG = 0.075, viskP = 4, viskI = 0.01, viskD = 0, DTkP = 5,
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
-			wristSetPoint, outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180, exchangePosOffset = 200, zero,
-			minus180, straightUp;
+			outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180;
 
 	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 25;
 
@@ -35,21 +39,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	// Subsystems for command based programming
 	public static Extenders extender;
 	public static Mittens mitten;
+	public static Wrist wristSubsystem;
+	public static operator op = new operator();
 
-	/**
-	 * Robot-wide initialization code should go here.
-	 *
-	 * <p>
-	 * Users should override this method for default Robot-wide initialization which
-	 * will be called when the robot is first powered on. It will be called exactly
-	 * one time.
-	 *
-	 * <p>
-	 * Warning: the Driver Station "Robot Code" light and FMS "Robot Ready"
-	 * indicators will be off until RobotInit() exits. Code in RobotInit() that
-	 * waits for enable will cause the robot to never indicate that the code is
-	 * ready, causing the robot to be bypassed in a match.
-	 */
 	@Override
 	public void robotInit() {
 
@@ -57,8 +49,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.setupTestMode();
 
 		Robot.extender = new Extenders("Extender");
-
 		Robot.mitten = new Mittens("Mitten");
+		Robot.wristSubsystem = new Wrist("Wrist");
+
+		// Add an option to smartdashboard to activate commands manually
+		SmartDashboard.putData("Toggle mittens", new toggleMitten());
+		SmartDashboard.putData("Toggle extension", new toggleExtension());
 
 		SmartDashboard.putData(Scheduler.getInstance());
 
@@ -83,42 +79,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		SmartDashboard.putNumber("Max Vel DT", this.maxVelDT);
 		SmartDashboard.putBoolean("neg", neg);
 		this.robot.wrist.configAllowableClosedloopError(0, 10);
-		this.wristSetPoint = this.robot.wrist.getPosition();
+		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Try to setup limelight
 		if (this.robot.limelight != null) {
 			SmartDashboard.putBoolean("LED", true);
 		}
 
-		if (this.robot.PRACTICEBOT) {
-			this.zero = 1874;
-		} else {
-			this.zero = -2063;
-		}
-
-		this.minus180 = this.zero - 2048;
-		this.straightUp = (this.zero + this.minus180) / 2;
-	}
-
-	/**
-	 * Initialization code for disabled mode should go here.
-	 *
-	 * <p>
-	 * Users should override this method for initialization code which will be
-	 * called each time the robot enters disabled mode.
-	 */
 	@Override
 	public void disabledInit() {
 		Scheduler.getInstance().removeAll();
 	}
 
-	/**
-	 * Initialization code for autonomous mode should go here.
-	 *
-	 * <p>
-	 * Users should override this method for initialization code which will be
-	 * called each time the robot enters autonomous mode.
-	 */
 	@Override
 	public void autonomousInit() {
 		this.teleopInit();
@@ -127,23 +99,18 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		Robot.mitten.secure();
 	}
 
-	/**
-	 * Initialization code for teleop mode should go here.
-	 *
-	 * <p>
-	 * Users should override this method for initialization code which will be
-	 * called each time the robot enters teleop mode.
-	 */
 	@Override
 	public void teleopInit() {
 		this.robot.nothing1.set(true);
 		this.robot.nothing2.set(true);
 
 		// Limits for the wrist
-		this.robot.wrist.configForwardSoftLimitThreshold((int) (this.straightUp + wristAngToTick(this.forwardLimit)));
-		this.robot.wrist.configReverseSoftLimitThreshold((int) (this.straightUp - wristAngToTick(this.backwardLimit)));
-		this.robot.wrist.configForwardSoftLimitEnable(true);
-		this.robot.wrist.configReverseSoftLimitEnable(true);
+		RobotMap.wrist.configForwardSoftLimitThreshold((int) (WristPosition.UP.getValue()
+				+ wristAngToTick(this.forwardLimit) + (this.robot.PRACTICEBOT ? 3937 : 0)));
+		RobotMap.wrist.configReverseSoftLimitThreshold((int) (WristPosition.UP.getValue()
+				- wristAngToTick(this.backwardLimit) + (this.robot.PRACTICEBOT ? 3937 : 0)));
+		RobotMap.wrist.configForwardSoftLimitEnable(true);
+		RobotMap.wrist.configReverseSoftLimitEnable(true);
 
 		// Limelight pid
 		this.viskP = SmartDashboard.getNumber("viskP", this.viskP);
@@ -163,16 +130,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.cruiseVel = (int) SmartDashboard.getNumber("Cruise Vel", this.cruiseVel);
 		this.maxAccel = (int) SmartDashboard.getNumber("Max Accel", this.maxAccel);
 		this.maxVelDT = SmartDashboard.getNumber("Max Vel DT", this.maxVelDT);
-		this.robot.wrist.config_kP(0, this.kP, this.kTimeOutMs);
-		this.robot.wrist.config_kI(0, this.kI, this.kTimeOutMs);
-		this.robot.wrist.config_kD(0, this.kD, this.kTimeOutMs);
-		this.robot.wrist.config_kF(0, this.kF, this.kTimeOutMs);
-		this.robot.wrist.config_IntegralZone(0, this.iZone, this.kTimeOutMs);
-		this.robot.wrist.configMotionCruiseVelocity(/* ticks per 100MS */(int) (this.cruiseVel), this.kTimeOutMs);
-		this.robot.wrist.configMotionAcceleration(/* ticks per 100MS per second */(int) (this.maxAccel),
-				this.kTimeOutMs);
-		this.wristSetPoint = this.robot.wrist.getPosition();
-		this.robot.wrist.stop();
+		RobotMap.wrist.config_kP(0, this.kP, this.kTimeOutMs);
+		RobotMap.wrist.config_kI(0, this.kI, this.kTimeOutMs);
+		RobotMap.wrist.config_kD(0, this.kD, this.kTimeOutMs);
+		RobotMap.wrist.config_kF(0, this.kF, this.kTimeOutMs);
+		RobotMap.wrist.config_IntegralZone(0, this.iZone, this.kTimeOutMs);
+		RobotMap.wrist.configMotionCruiseVelocity(/* ticks per 100MS */(int) (this.cruiseVel), this.kTimeOutMs);
+		RobotMap.wrist.configMotionAcceleration(/* ticks per 100MS per second */(int) (this.maxAccel), this.kTimeOutMs);
+		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Drive train PID
 		this.DTkP = SmartDashboard.getNumber("DTkP", this.DTkP);
@@ -193,20 +158,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.outtakePresetSpeed = SmartDashboard.getNumber("Outtake Preset Speed", this.outtakePresetSpeed);
 	}
 
-	/**
-	 * Initialization code for test mode should go here.
-	 *
-	 * <p>
-	 * Users should override this method for initialization code which will be
-	 * called each time the robot enters test mode.
-	 */
 	@Override
 	public void testInit() {
 	}
 
-	/**
-	 * Periodic code for all robot modes should go here.
-	 */
 	@Override
 	public void robotPeriodic() {
 		try {
@@ -216,27 +171,15 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Left velocity", this.robot.leftDrive.getSelectedSensorVelocity());
 			SmartDashboard.putNumber("Right velocity", this.robot.rightDrive.getSelectedSensorVelocity());
 
-			// Zero
-			SmartDashboard.putNumber("Zero", this.zero);
-
-			// Log Buttons
-			SmartDashboard.putBoolean("opA", this.robot.operator.getAButton());
-			SmartDashboard.putBoolean("opB", this.robot.operator.getBButton());
-			SmartDashboard.putBoolean("opX", this.robot.operator.getXButton());
-			SmartDashboard.putBoolean("opY", this.robot.operator.getYButton());
-			SmartDashboard.putNumber("opPOV", this.robot.operator.getPOV());
-			SmartDashboard.putBoolean("opLB", this.robot.operator.getBumper(Hand.kLeft));
-			SmartDashboard.putBoolean("oRLB", this.robot.operator.getBumper(Hand.kRight));
-			SmartDashboard.putNumber("opLTr", this.robot.operator.getTriggerAxis(Hand.kLeft));
-			SmartDashboard.putNumber("opRTr", this.robot.operator.getTriggerAxis(Hand.kRight));
-
+			// Log driver button
 			SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
 
 			// Wrist stuff
-			SmartDashboard.putNumber("SetPoint", this.wristSetPoint);
-			SmartDashboard.putNumber("Raw Wrist Position", this.robot.wrist.getPosition());
-			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)",
-					wristTickToAng(this.robot.wrist.getPosition() - this.straightUp));
+			SmartDashboard.putNumber("SetPoint", Wrist.wristSetpoint);
+			SmartDashboard.putNumber("Raw Wrist Position", RobotMap.wrist.getSelectedSensorPosition());
+			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)", wristTickToAng(RobotMap.wrist
+					.getSelectedSensorPosition()
+					- (this.robot.PRACTICEBOT ? WristPosition.UP.getValue() + 3937 : WristPosition.UP.getValue())));
 			neg = SmartDashboard.getBoolean("neg", this.neg);
 			// Ball?
 			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
@@ -264,42 +207,22 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		}
 	}
 
-	/**
-	 * Periodic code for disabled mode should go here.
-	 */
 	@Override
 	public void disabledPeriodic() {
 		// This function is me.
 	}
 
-	/**
-	 * Periodic code for autonomous mode should go here.
-	 */
 	@Override
 	public void autonomousPeriodic() {
 		this.teleopPeriodic();
 	}
 
-	/**
-	 * Periodic code for teleop mode should go here.
-	 */
 	@Override
 	public void teleopPeriodic() {
 		try {
 
-			if (this.neg) {
-				zero = -2063;
-			} else {
-				zero = 2063;
-			}
-			this.minus180 = this.zero - 2048;
-			this.straightUp = (this.zero + this.minus180) / 2;
-
 			// Limelight stuff
 			this.pid.setSetpoint(this.visSetpoint);
-			if (this.wristSetPoint == zero || this.robot.limelight.getEntry("tv").getDouble(0) != 1) {
-				this.visEnabled = false;
-			}
 			if (this.visEnabled) {
 				this.vis = this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0));
 			} else {
@@ -381,41 +304,36 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			// Wrist
 			// Update desired position
 			if (Math.abs(this.robot.operator.getY(Hand.kLeft)) > .2d) {
-				this.wristSetPoint += this.robot.operator.getY(Hand.kLeft) * 40;
+				Wrist.wristSetpoint += this.robot.operator.getY(Hand.kLeft) * 40;
 			}
 			// Gets d-pad inputs
-			if (this.robot.operator.getPOV() == 0) { // straight up
-				this.wristSetPoint = this.straightUp;
-			} else if (this.robot.operator.getPOV() == 90) { // minus 180
-				this.wristSetPoint = this.straightUp - 1024;
-			} else if (this.robot.operator.getPOV() == 270) { // zero
-				this.wristSetPoint = this.straightUp + 1024;
-			} else if (this.robot.operator.getBumper(Hand.kRight)) {
-				this.wristSetPoint = this.straightUp - this.exchangePosOffset;
-			} else if (this.robot.operator.getBumper(Hand.kLeft)) {
-				this.wristSetPoint = this.straightUp + this.exchangePosOffset;
-			}
+			/*
+			 * if (this.robot.operator.getPOV() == 0) { // straight up Wrist.wristSetpoint =
+			 * this.straightUp; } else if (this.robot.operator.getPOV() == 90) { // minus
+			 * 180 this.wristSetPoint = this.straightUp - 1024; } else if
+			 * (this.robot.operator.getPOV() == 270) { // zero this.wristSetPoint =
+			 * this.straightUp + 1024; } else if
+			 * (this.robot.operator.getBumper(Hand.kRight)) { this.wristSetPoint =
+			 * this.straightUp - this.exchangePosOffset; } else if
+			 * (this.robot.operator.getBumper(Hand.kLeft)) { this.wristSetPoint =
+			 * this.straightUp + this.exchangePosOffset; }
+			 */
 
 			// arbitrary feed forward accounts for gravity
-			this.arbFeedForward = -Math.sin(
-					wristTickToAng(this.robot.wrist.getSelectedSensorPosition() - this.straightUp) * (Math.PI / 180))
-					* this.kG;
+			this.arbFeedForward = -Math.sin(wristTickToAng(this.robot.wrist.getSelectedSensorPosition()
+					- (WristPosition.UP.getValue() + (this.robot.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
 			if (!this.manualOveride) {
-				this.robot.wrist.set(ControlMode.MotionMagic, this.wristSetPoint, DemandType.ArbitraryFeedForward,
+				// If the robot is the practice one, adjust the value slightly
+				if (this.robot.PRACTICEBOT) {
+					Wrist.wristSetpoint += 3937; // This is the offset difference between the two
+				}
+				this.robot.wrist.set(ControlMode.MotionMagic, Wrist.wristSetpoint, DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
 			} else {
 				this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
 			}
 			if (this.robot.operator.getBButtonPressed()) {
-				this.manualOveride = !manualOveride;
-			}
-
-			if (this.robot.limelight != null) {
-				if (this.wristSetPoint == this.zero) {
-					this.robot.disableLimelightLEDs();
-				} else {
-					this.robot.enableLimelightLEDs();
-				}
+				this.manualOveride = !this.manualOveride;
 			}
 
 		} catch (Exception e) {

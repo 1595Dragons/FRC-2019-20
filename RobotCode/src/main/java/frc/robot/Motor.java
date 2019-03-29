@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
  * 
  * @author Stephen - FRC 1595
  */
+@Deprecated
 public class Motor extends com.ctre.phoenix.motorcontrol.can.TalonSRX {
 
 	/**
