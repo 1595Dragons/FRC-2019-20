@@ -7,7 +7,7 @@ public class Secure extends Command {
 
     public Secure() {
         this.requires(Robot.mitten);
-        this.setTimeout(0.25d);
+        this.setTimeout(0.02d);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			DTkI = 0.003, DTkD = 0, LDTkF = 1, RDTkF = 1, maxVelDT = 400, arbFeedForward = 0, vis = 0, visSetpoint = 3,
 			outtakePresetSpeed = .55, wristTicksPerDeg = 2048 / 180;
 
-	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 25;
+	private int iZone = 100, cruiseVel = 200, maxAccel = 800, forwardLimit = 90, backwardLimit = 90, kTimeOutMs = 10;
 
 	private MiniPID pid = new MiniPID(viskP, viskI, viskD);
 
@@ -40,7 +40,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 	public static Extenders extender;
 	public static Mittens mitten;
 	public static Wrist wristSubsystem;
-	public static operator op = new operator();
+	public static operator op;
 
 	@Override
 	public void robotInit() {
@@ -51,6 +51,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		Robot.extender = new Extenders("Extender");
 		Robot.mitten = new Mittens("Mitten");
 		Robot.wristSubsystem = new Wrist("Wrist");
+		Robot.op = new operator();
 
 		// Add an option to smartdashboard to activate commands manually
 		SmartDashboard.putData("Toggle mittens", new toggleMitten());
@@ -78,13 +79,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		SmartDashboard.putNumber("Max Accel", this.maxAccel);
 		SmartDashboard.putNumber("Max Vel DT", this.maxVelDT);
 		SmartDashboard.putBoolean("neg", neg);
-		this.robot.wrist.configAllowableClosedloopError(0, 10);
+		RobotMap.wrist.configAllowableClosedloopError(0, 10);
 		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Try to setup limelight
 		if (this.robot.limelight != null) {
 			SmartDashboard.putBoolean("LED", true);
 		}
+	}
 
 	@Override
 	public void disabledInit() {
@@ -135,8 +137,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		RobotMap.wrist.config_kD(0, this.kD, this.kTimeOutMs);
 		RobotMap.wrist.config_kF(0, this.kF, this.kTimeOutMs);
 		RobotMap.wrist.config_IntegralZone(0, this.iZone, this.kTimeOutMs);
-		RobotMap.wrist.configMotionCruiseVelocity(/* ticks per 100MS */(int) (this.cruiseVel), this.kTimeOutMs);
-		RobotMap.wrist.configMotionAcceleration(/* ticks per 100MS per second */(int) (this.maxAccel), this.kTimeOutMs);
+		RobotMap.wrist.configMotionCruiseVelocity((int) (this.cruiseVel), this.kTimeOutMs); // ticks per 100MS
+		RobotMap.wrist.configMotionAcceleration((int) (this.maxAccel), this.kTimeOutMs); // ticks per 100MS per second
 		Wrist.wristSetpoint = RobotMap.wrist.getSelectedSensorPosition();
 
 		// Drive train PID
@@ -172,16 +174,19 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Right velocity", this.robot.rightDrive.getSelectedSensorVelocity());
 
 			// Log driver button
-			SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
+			// SmartDashboard.putBoolean("drA", this.robot.driver.getAButton());
 
 			// Wrist stuff
-			SmartDashboard.putNumber("SetPoint", Wrist.wristSetpoint);
-			SmartDashboard.putNumber("Raw Wrist Position", RobotMap.wrist.getSelectedSensorPosition());
-			SmartDashboard.putNumber("Adjusted Wrist Position (Ang)", wristTickToAng(RobotMap.wrist
-					.getSelectedSensorPosition()
-					- (this.robot.PRACTICEBOT ? WristPosition.UP.getValue() + 3937 : WristPosition.UP.getValue())));
-			neg = SmartDashboard.getBoolean("neg", this.neg);
-			// Ball?
+			/*
+			 * SmartDashboard.putNumber("SetPoint", Wrist.wristSetpoint);
+			 * SmartDashboard.putNumber("Raw Wrist Position",
+			 * RobotMap.wrist.getSelectedSensorPosition());
+			 * SmartDashboard.putNumber("Adjusted Wrist Position (Ang)",
+			 * wristTickToAng(RobotMap.wrist .getSelectedSensorPosition() -
+			 * (this.robot.PRACTICEBOT ? WristPosition.UP.getValue() + 3937 :
+			 * WristPosition.UP.getValue()))); neg = SmartDashboard.getBoolean("neg",
+			 * this.neg); // Ball?
+			 */
 			SmartDashboard.putBoolean("Has ball", !this.robot.ballIn.get());
 
 			// If the limelight stuff is not null, show its values
@@ -223,15 +228,12 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 
 			// Limelight stuff
 			this.pid.setSetpoint(this.visSetpoint);
-			if (this.visEnabled) {
-				this.vis = this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0));
-			} else {
-				this.vis = 0;
-			}
+			this.vis = this.visEnabled ? this.pid.getOutput(this.robot.limelight.getEntry("ty").getDouble(0)) : 0;
 
 			// Calculate drive power
-			double forward = Math.pow(this.robot.driver.getY(Hand.kLeft), 1) * .8,
-					turn = Math.pow(this.robot.driver.getX(Hand.kRight), 1) * .6;
+			double forward = this.robot.driver.getY(Hand.kLeft) * .8, turn = this.robot.driver.getX(Hand.kRight) * .6;
+
+			// Deadbands
 			if (Math.abs(forward) < 0.2d) {
 				forward = 0;
 			}
@@ -250,6 +252,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				this.robot.leftDrive.set(ControlMode.Velocity, (forward - turn) * .4 * this.maxVelDT - this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, (forward + turn) * .4 * this.maxVelDT + this.vis);
 			}
+
+			// Vision driving
 			if (forward == 0 && turn == 0) {
 				this.robot.leftDrive.set(ControlMode.Velocity, -this.vis);
 				this.robot.rightDrive.set(ControlMode.Velocity, +this.vis);
@@ -284,20 +288,14 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 					this.robot.leftOuttake.setPower(this.outtakePresetSpeed);
 				} else if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
 					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
+				} else {
+					this.robot.leftOuttake.setPower(0); // if no input on op, set to 0
 				}
-				// if no input on op, set to 0
-				else {
-					this.robot.leftOuttake.setPower(0);
-				}
-			}
-			// if a ball is sensed only allow outtaking
-			else {
+			} else { // if a ball is sensed only allow outtaking
 				if (this.robot.operator.getTriggerAxis(Hand.kRight) > .3) {
 					this.robot.leftOuttake.setPower(-this.outtakePresetSpeed);
-				}
-				// Stop
-				else {
-					this.robot.leftOuttake.setPower(0);
+				} else {
+					this.robot.leftOuttake.setPower(0); // Stop
 				}
 			}
 
@@ -320,7 +318,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			 */
 
 			// arbitrary feed forward accounts for gravity
-			this.arbFeedForward = -Math.sin(wristTickToAng(this.robot.wrist.getSelectedSensorPosition()
+			this.arbFeedForward = -Math.sin(wristTickToAng(RobotMap.wrist.getSelectedSensorPosition()
 					- (WristPosition.UP.getValue() + (this.robot.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
 			if (!this.manualOveride) {
 				// If the robot is the practice one, adjust the value slightly
@@ -332,6 +330,7 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			} else {
 				this.robot.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
 			}
+
 			if (this.robot.operator.getBButtonPressed()) {
 				this.manualOveride = !this.manualOveride;
 			}
@@ -361,9 +360,6 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		return tick / wristTicksPerDeg;
 	}
 
-	/**
-	 * Periodic code for test mode should go here.
-	 */
 	@Override
 	public void testPeriodic() {
 		try {

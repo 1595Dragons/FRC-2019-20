@@ -7,7 +7,7 @@ public class Release extends Command {
 
     public Release() {
         this.requires(Robot.mitten);
-        this.setTimeout(0.25d);
+        this.setTimeout(0.02d);
     }
 
     @Override

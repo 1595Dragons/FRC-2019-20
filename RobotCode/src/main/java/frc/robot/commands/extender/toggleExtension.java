@@ -17,11 +17,7 @@ public class toggleExtension extends Command {
 	}
 
 	protected void initialize() {
-		if (Extenders.isExtended) {
-			Robot.extender.extend();
-		} else {
-			Robot.extender.retract();
-		}
+		Robot.extender.toggle();
 	}
 
 	protected void execute() {
