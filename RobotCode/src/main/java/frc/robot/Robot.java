@@ -118,10 +118,10 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 		this.robot.nothing2.set(true);
 
 		// Limits for the wrist
-		RobotMap.wrist.configForwardSoftLimitThreshold((int) (WristPosition.UP.getValue()
-				+ wristAngToTick(this.forwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
-		RobotMap.wrist.configReverseSoftLimitThreshold((int) (WristPosition.UP.getValue()
-				- wristAngToTick(this.backwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
+		RobotMap.wrist.configForwardSoftLimitThreshold(
+				(int) (WristPosition.UP + wristAngToTick(this.forwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
+		RobotMap.wrist.configReverseSoftLimitThreshold(
+				(int) (WristPosition.UP - wristAngToTick(this.backwardLimit) + (RobotMap.PRACTICEBOT ? 3937 : 0)));
 		RobotMap.wrist.configForwardSoftLimitEnable(true);
 		RobotMap.wrist.configReverseSoftLimitEnable(true);
 
@@ -185,6 +185,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			SmartDashboard.putNumber("Right velocity", RobotMap.rightDrive.getSelectedSensorVelocity());
 
 			SmartDashboard.putBoolean("Has ball", !RobotMap.ballIn.get());
+
+			SmartDashboard.putNumber("Wrist position", RobotMap.wrist.getSelectedSensorPosition());
 
 			// If the limelight stuff is not null, show its values
 			if (RobotMap.limelight != null) {
@@ -297,8 +299,9 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 			}
 
 			// arbitrary feed forward accounts for gravity
-			this.arbFeedForward = -Math.sin(wristTickToAng(RobotMap.wrist.getSelectedSensorPosition()
-					- (WristPosition.UP.getValue() + (RobotMap.PRACTICEBOT ? 3937 : 0))) * (Math.PI / 180)) * this.kG;
+			this.arbFeedForward = -Math.sin(wristTickToAng(
+					RobotMap.wrist.getSelectedSensorPosition() - (WristPosition.UP + (RobotMap.PRACTICEBOT ? 3937 : 0)))
+					* (Math.PI / 180)) * this.kG;
 			if (!Wrist.manual) {
 				RobotMap.wrist.set(ControlMode.MotionMagic, Wrist.getSetPoint(), DemandType.ArbitraryFeedForward,
 						this.arbFeedForward);
@@ -306,7 +309,8 @@ public class Robot extends edu.wpi.first.wpilibj.TimedRobot {
 				RobotMap.wrist.set(ControlMode.PercentOutput, this.robot.operator.getY(Hand.kLeft));
 			}
 
-			SmartDashboard.putNumber("Wrist displacement", Wrist.getSetPoint() - RobotMap.wrist.getSelectedSensorPosition());
+			SmartDashboard.putNumber("Wrist displacement",
+					Wrist.getSetPoint() - RobotMap.wrist.getSelectedSensorPosition());
 
 			if (this.robot.operator.getBButtonPressed()) {
 				Wrist.manual = !Wrist.manual;

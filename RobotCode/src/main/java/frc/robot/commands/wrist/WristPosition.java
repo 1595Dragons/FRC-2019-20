@@ -1,15 +1,7 @@
 package frc.robot.commands.wrist;
 
-public enum WristPosition {
-	UP(-3087), ZERO(-2063), MINUS180(-4111), FORWARDEXCHANGE(-2887), REVERSEEXCHANGE(-3287);
+public class WristPosition {
 
-	private int value;
-
-	public int getValue() {
-		return this.value;
-	}
-
-	private WristPosition(int value) {
-		this.value = value;
-	}
+	public static int ZERO = -66, MINUS180 = ZERO - 2048, UP = (ZERO + MINUS180) / 2, FORWARDEXCHANGE = UP + 300,
+			REVERSEEXCHANGE = UP - 300;
 }

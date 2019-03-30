@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
-import frc.robot.RobotMap;
 import frc.robot.commands.wrist.WristPosition;
 
 public class Wrist extends Subsystem {
@@ -23,32 +22,28 @@ public class Wrist extends Subsystem {
 	}
 
 	public void moveToZero() {
-		this.moveTo(WristPosition.ZERO);
+		this.adjustWristPosition(WristPosition.ZERO);
 	}
 
 	public void moveToUp() {
-		this.moveTo(WristPosition.UP);
+		this.adjustWristPosition(WristPosition.UP);
 	}
 
 	public void moveToMinus180() {
-		this.moveTo(WristPosition.MINUS180);
+		this.adjustWristPosition(WristPosition.MINUS180);
 	}
 
 	public void moveToForwardExchange() {
-		this.moveTo(WristPosition.FORWARDEXCHANGE);
+		this.adjustWristPosition(WristPosition.FORWARDEXCHANGE);
 	}
 
 	public void moveToReverseExhange() {
-		this.moveTo(WristPosition.REVERSEEXCHANGE);
-	}
-
-	public void moveTo(WristPosition position) {
-		this.adjustWristPosition(position.getValue());
+		this.adjustWristPosition(WristPosition.REVERSEEXCHANGE);
 	}
 
 	private void adjustWristPosition(int position) {
 		// 3937 is the difference between the practice and comp encoder
-		Wrist.wristSetpoint = RobotMap.PRACTICEBOT ? position + 3937 : position;
+		Wrist.wristSetpoint = position;
 	}
 
 	public static void setSetPoint(int setpoint) {
